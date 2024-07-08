@@ -25,4 +25,4 @@ repos:
     hooks:
       - id: codespell
         args: ["-L", "sur,nd"]
-        exclude: "docs/.*""
+        exclude: "docs/.*"
