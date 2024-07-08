@@ -4,6 +4,4 @@ import pandas as pd
 def test():
     """Test."""
 
-    assert (
-        1.0
-    ) < 1.01
+    assert (1.0) < 1.01
