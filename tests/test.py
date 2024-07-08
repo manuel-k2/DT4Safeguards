@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-def test_network_model():
+def test():
     """Test."""
 
     assert (
