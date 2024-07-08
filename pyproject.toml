@@ -30,23 +30,7 @@ dependencies = [
   "xarray",
   "dataclasses",
   "typing",
-  "pathlib",
-  "better-pip",
-  "cvxpy",
-  "scipy",
-  "traceback2",
-  "tqdm",
-  "matplotlib",
-  "torch",
-  "torchvision",
-  "torchinfo",
-  "tensorboard",
-  "torchmetrics",
-  "ray",
-  "filelock",
-  "pytest",
-  "pytest-cov",
-  "pylint"
+  "pathlib"
 ]
 dynamic = ["version"]
 
