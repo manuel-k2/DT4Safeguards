@@ -22,7 +22,32 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = { file = ["requirements.txt"] }
+dependencies = [
+  "dash",
+  "plotly",
+  "pandas",
+  "numpy",
+  "xarray",
+  "dataclasses",
+  "typing",
+  "pathlib",
+  "better-pip",
+  "cvxpy",
+  "scipy",
+  "traceback2",
+  "tqdm",
+  "matplotlib",
+  "t"orch",
+  "torchvision",
+  "torchinfo",
+  "tensorboard",
+  "t"orchmetrics",
+  "ray",
+  "filelock",
+  "pytest",
+  "pytest-cov",
+  "pylint"
+]
 dynamic = ["version"]
 
 [project.urls]
