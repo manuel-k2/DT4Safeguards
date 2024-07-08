@@ -6,7 +6,6 @@ def tests(session: nox.Session) -> None:
     """
     Run the unit and regular tests.
     """
-    session.decode("utf-16", errors='ignore')
     session.run("pytest", *session.posargs)
 
 
@@ -18,7 +17,6 @@ def docs(session: nox.Session) -> None:
 
     session.install(".[docs]")
     session.chdir("docs")
-    session.decode("utf-16", errors='ignore')
     session.run("sphinx-build", "-M", "html", ".", "build")
 
 
@@ -26,5 +24,4 @@ def docs(session: nox.Session) -> None:
 def serve(session: nox.Session) -> None:
     docs(session)
     print("Launching docs at http://localhost:8000/ - use Ctrl-C to quit")
-    session.decode("utf-16", errors='ignore')
     session.run("python", "-m", "http.server", "8000", "-d", "_build/html")
