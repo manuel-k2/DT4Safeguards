@@ -1,4 +1,4 @@
-def test():
+def test_dummy():
     """
     Test.
     """
