@@ -41,7 +41,7 @@ dependencies = [
   "torchvision",
   "torchinfo",
   "tensorboard",
-  "t"orchmetrics",
+  "torchmetrics",
   "ray",
   "filelock",
   "pytest",
