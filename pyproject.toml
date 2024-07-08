@@ -35,9 +35,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/manuel-k2/projectfiles#readme"
-Issues = "https://github.com/manuel-k2/projectfiles/issues"
-Source = "https://github.com/manuel-k2/projectfiles"
+Documentation = "https://github.com/manuel-k2/DT4Safeguards#readme"
+Issues = "https://github.com/manuel-k2/DT4Safeguards/issues"
+Source = "https://github.com/manuel-k2/DT4Safeguards"
 
 [tool.hatch.version]
 path = "project/__about__.py"
@@ -90,3 +90,6 @@ xfail_strict = true
 filterwarnings = ["error"]
 log_cli_level = "info"
 testpaths = ["tests"]
+
+[tool.codespell]
+skip = "docs"

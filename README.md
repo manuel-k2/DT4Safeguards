@@ -1,4 +1,4 @@
-# DT4S
+# DT4Safeguards
 ## Digital Twin for Safeguards in Nuclear Waste Management
 
 [![.github/workflows/ci.yml](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
@@ -9,10 +9,15 @@ Manuel Kreutle
 
 **Table of Contents**
 
+- [Introduction](#introduction)
 - [Requirements](#requirements)
 - [Results](#results)
 - [Documentation](#documentation)
 - [License](#license)
+
+## Introduction
+
+DT4Safeguards (Digital Twin for Safeguards in Nuclear Waste Management) is a python framework modeling safeguards activities in nuclear facilities related to the process of the disposal of nuclear waste.
 
 ## Requirements
 
