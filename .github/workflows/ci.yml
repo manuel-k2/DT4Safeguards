@@ -55,9 +55,6 @@ jobs:
         id: pages
         uses: actions/configure-pages@v2
 
-      - name: Install nox
-        run: python -m pip install nox
-
       - name: build output
         run: python -m nox -s docs
 
@@ -79,9 +76,6 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-
-      - name: Install nox
-        run: python -m pip install nox
 
       - name: build output
         run: python -m nox -s docs
