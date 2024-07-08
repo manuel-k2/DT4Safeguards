@@ -32,8 +32,8 @@ Results are then visible with a browser at http://127.0.0.1:8050/.
 
 The project documentation was created with Sphynx and deployed with Github Pages. It can be found under:
 
-https://manuel-k2.github.io/dt4safeguards/
+https://manuel-k2.github.io/DT4Safeguards/
 
 ## License
 
-`projectfiles` is distributed under the terms of the [GNU GPL-3.0](https://duckduckgo.com/?t=ftsa&q=GNU+General+Public+License+v3.0) license.
+`projectfiles` is distributed under the terms of the [GNU GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
