@@ -92,4 +92,4 @@ log_cli_level = "info"
 testpaths = ["tests"]
 
 [tool.codespell]
-skip = "docs"
+skip = "docs/"
