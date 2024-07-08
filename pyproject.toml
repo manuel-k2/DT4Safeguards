@@ -37,7 +37,7 @@ dependencies = [
   "traceback2",
   "tqdm",
   "matplotlib",
-  "t"orch",
+  "torch",
   "torchvision",
   "torchinfo",
   "tensorboard",
