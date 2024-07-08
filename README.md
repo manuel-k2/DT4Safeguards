@@ -1,7 +1,7 @@
 # DT4S
 ## Digital Twin for Safeguards in Nuclear Waste Management
 
-[![.github/workflows/ci.yml](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml) [![pages-build-deployment](https://github.com/manuel-k2/projectfiles/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/manuel-k2/projectfiles/actions/workflows/pages/pages-build-deployment) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://duckduckgo.com/?t=ftsa&q=GNU+General+Public+License+v3.0)
+[![.github/workflows/ci.yml](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml) [![pages-build-deployment](https://github.com/manuel-k2/DT4Safeguards/deployments/github-pages/badge.svg)](https://github.com/manuel-k2/DT4Safeguards/deployments/github-pages) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
 **Author**
