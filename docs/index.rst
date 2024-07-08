@@ -17,7 +17,10 @@ Indices and tables
 
 Introduction
 ------------
-[DT4Safeguards](https://github.com/manuel-k2/DT4Safeguards) (Digital Twin for Safeguards in Nuclear Waste Management) is a python framework modeling safeguards activities in nuclear facilities related to the process of the disposal of nuclear waste.
+DT4Safeguards (Digital Twin for Safeguards in Nuclear Waste Management) is a python framework modeling safeguards activities in nuclear facilities related to the process of the disposal of nuclear waste.
+
+The project can be found in the following repository:
+https://github.com/manuel-k2/DT4Safeguards
 
 Requirements
 ------------
