@@ -19,8 +19,6 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.7", "3.10"]
-        node:
-          - version: 20
     steps:
       - uses: actions/checkout@v3
 
@@ -64,7 +62,7 @@ jobs:
         run: python -m nox -s docs
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v3.0.1
         with:
           path: docs/build/html
 
