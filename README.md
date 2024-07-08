@@ -32,7 +32,7 @@ Results are then visible with a browser at http://127.0.0.1:8050/.
 
 The project documentation was created with Sphynx and deployed with Github Pages. It can be found under:
 
-https://manuel-k2.github.io/projectfiles/
+https://manuel-k2.github.io/dt4safeguards/
 
 ## License
 
