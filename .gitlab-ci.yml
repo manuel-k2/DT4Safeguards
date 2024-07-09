@@ -1,0 +1,49 @@
+stages:
+  - test
+  - format
+  - build_and_deploy
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+before_script:
+  - apt-get update -qq
+  - apt-get install -qq python3-pip python3-setuptools
+
+test:python_3_7:
+  stage: test
+  image: python:3.7
+  script:
+    - pip install nox
+    - nox -s tests
+
+test:python_3_10:
+  stage: test
+  image: python:3.10
+  script:
+    - pip install nox
+    - nox -s tests
+
+format:
+  stage: format
+  image: python:3.10
+  script:
+    - pip install pre-commit
+    - pre-commit run --all-files
+
+build_and_deploy:
+  stage: build_and_deploy
+  image: python:3.10
+  script:
+    - pip install sphinx sphinx-rtd-theme nox
+    - nox -s docs
+    - sphinx-build -b html docs/source docs/build/html
+    - ls docs/build/html
+  artifacts:
+    paths:
+      - docs/build/html
+  only:
+    - main
+  environment:
+    name: production
+    url: http://example.com  # Change to your GitLab Pages URL
