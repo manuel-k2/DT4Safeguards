@@ -4,7 +4,7 @@
 [![.github/workflows/ci.yml](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml/badge.svg)](https://github.com/manuel-k2/projectfiles/actions/workflows/ci.yml) [![License: GPL-3.0](https://img.shields.io/badge/License-GPL3.0-yellow.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
-**Author**
+**Author:**
 Manuel Kreutle
 
 **Table of Contents**
@@ -41,4 +41,4 @@ https://manuel-k2.github.io/DT4Safeguards/
 
 ## License
 
-`projectfiles` is distributed under the terms of the [GNU GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
+`DT4Safeguards` is distributed under the terms of the [GNU GPL-3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) license.
