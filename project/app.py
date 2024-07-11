@@ -12,6 +12,6 @@ first_facility = Facility(
     name="Interim storage", dimensions=Dimensions(1, 1, 1)
 )
 
-print(first_facility.id)
+first_facility.GetDimensions().PrintDimensions()
 
 MonitoringSystem.display_registry()
