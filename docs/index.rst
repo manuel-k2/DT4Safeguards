@@ -34,7 +34,7 @@ The results were visualized with Dash and can be displayed locally. Run the Dash
 
 `python3 project/app.py`
 
-Results are then visible with a browser at http://127.0.0.1:8050/.
+Results are then visible with a browser at http://127.0.0.1:8050/. asdfg
 
 Modules
 -------
