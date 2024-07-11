@@ -11,11 +11,11 @@ class Facility(HistoryClass):
     A class that describes a facility.
 
     Attributes:
-		id (int): Unique ID of facility.
-		name (str): Name of facility.
-				dimensions (Dimensions): Dimensions of facility.
-		room_inventory (Dict[int, Room]):
-			Dictionary of rooms that are contained in facility.
+                id (int): Unique ID of facility.
+                name (str): Name of facility.
+                        dimensions (Dimensions): Dimensions of facility.
+                room_inventory (Dict[int, Room]):
+                        Dictionary of rooms that are contained in facility.
     """
 
     id: int

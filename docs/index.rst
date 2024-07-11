@@ -40,5 +40,6 @@ Modules
 -------
 
 .. autosummary::
-   :toctree:
    :recursive:
+
+   project
