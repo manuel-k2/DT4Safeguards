@@ -40,5 +40,5 @@ Modules
 -------
 
 .. autosummary::
-   :toctree: _autosummary
+   :toctree:
    :recursive:

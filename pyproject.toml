@@ -80,7 +80,7 @@ docs = [
     "myst_parser >=0.13",  # Markdown
     "sphinx >=4.0",
     "sphinx_copybutton",  # Easy code copy button
-    "matplotlib", "xarray", "dash",
+    "matplotlib", "xarray"
 ]
 
 [tool.pytest.ini_options]
