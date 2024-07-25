@@ -64,7 +64,7 @@ class Facility(HistoryClass):
         Args:
                 room (Room): Room to be added to inventory.
         """
-        self.room_inventory[room.id] = {room}
+        self.room_inventory[room.id] = room
 
     def RemoveRoom(self, roomID: int):
         """
@@ -83,6 +83,11 @@ class Facility(HistoryClass):
                 room_inventory (Dict[int, Room]):
                         Dictionary of rooms that are contained in facility.
         """
+        if not self.room_inventory:
+            print("Inventory is empty.")
+        else:
+            for id, room in self.room_inventory.items():
+                print(f"ID: {id}, Room: {room}")
         return self.room_inventory
 
     # def PresentEntryInventory(self):

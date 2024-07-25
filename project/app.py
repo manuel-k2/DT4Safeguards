@@ -1,17 +1,18 @@
 from model.monitoringsystem import MonitoringSystem
 from model.facility import Facility
-from model.historyclass import HistoryClass
+from model.room import Room
 
 from projecttypes.dimensions import Dimensions
 
-hist1 = HistoryClass()
-hist2 = HistoryClass()
-hist3 = HistoryClass()
-
 first_facility = Facility(
-    name="Interim storage", dimensions=Dimensions(1, 1, 1)
+    type="Interim storage", name="Jülich", dimensions=Dimensions(1, 1, 1)
 )
 
-first_facility.GetDimensions().PrintDimensions()
+first_room = Room(
+    type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1)
+)
+
+first_facility.AddRoom(first_room)
+first_facility.GetRoomInventory()
 
 MonitoringSystem.display_registry()

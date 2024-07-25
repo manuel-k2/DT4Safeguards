@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict
 
 from model.monitoringsystem import IDClass
@@ -15,7 +15,7 @@ class HistoryClass(IDClass):
             _registry (Dict[int, {str, int}]):
     """
 
-    _registry: Dict[int, {str, int}] = {}
+    registry: Dict[int, {str, int}] = field(default_factory=dict)
 
     def Activation(self, cmd: Command):
         """
@@ -37,4 +37,4 @@ class HistoryClass(IDClass):
                 targetID (int):
                         Unique ID of instance targeted by processed command.
         """
-        self._registry[cmdID] = {cmdType, targetID}
+        self.registry[cmdID] = {cmdType, targetID}
