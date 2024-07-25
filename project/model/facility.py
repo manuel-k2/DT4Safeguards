@@ -17,6 +17,7 @@ class Facility(HistoryClass):
             room_inventory (Dict[int, Room]):
                     Dictionary of rooms that are contained in facility.
     """
+
     type: str
     name: str
     dimensions: Dimensions
@@ -58,25 +59,25 @@ class Facility(HistoryClass):
     def AddRoom(self, room: Room):
         """
         Add a room to the facility's room inventory.
-        
+
         Args:
                 room (Room): Room to be added to inventory.
         """
         self.room_inventory[room.id] = {room}
-    
+
     def RemoveRoom(self, roomID: int):
         """
         Remove a room to the facility's room inventory.
-        
+
         Args:
                 roomID (int): ID of room to be removed from inventory.
         """
         del self.room_inventory[roomID]
-    
+
     def GetRoomInventory(self) -> Dict[int, Room]:
         """
         Get the facility's room inventory.
-        
+
         Returns:
                 room_inventory (Dict[int, Room]):
                         Dictionary of rooms that are contained in facility.

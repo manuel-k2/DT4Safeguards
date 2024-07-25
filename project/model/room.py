@@ -12,6 +12,7 @@ class Room(HistoryClass):
             name (str): Name of facility.
             dimensions (Dimensions): Dimensions of facility.
     """
+
     type: str
     name: str
     dimensions: Dimensions
