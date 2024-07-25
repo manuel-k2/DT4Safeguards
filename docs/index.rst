@@ -39,5 +39,5 @@ Results are then visible with a browser at http://127.0.0.1:8050/.
 Modules
 -------
 
-.. automodule:: project
+.. automodule:: 
     :members:
