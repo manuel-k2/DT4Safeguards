@@ -56,3 +56,12 @@ Modules
 
 .. automodule:: project.projecttypes.command
     :members:
+
+.. automodule:: project.projecttypes.transportcommand
+    :members:
+
+.. automodule:: project.projecttypes.location
+    :members:
+
+.. automodule:: project.projecttypes.dimensions
+    :members:
