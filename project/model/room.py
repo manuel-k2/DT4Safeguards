@@ -4,11 +4,21 @@ from projecttypes.dimensions import Dimensions
 
 
 class Room(HistoryClass):
+    """
+    A class that describes a roon.
 
+    Attributes:
+            type (str): Type of facility.
+            name (str): Name of facility.
+            dimensions (Dimensions): Dimensions of facility.
+    """
+    type: str
     name: str
     dimensions: Dimensions
 
-    def __init__(self, name, dimensions):
+    def __init__(self, type: str, name: str, dimensions: Dimensions):
+        super().__init__()
+        self.type = type
         self.name = name
         self.dimensions = dimensions
 

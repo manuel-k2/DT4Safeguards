@@ -11,35 +11,77 @@ class Facility(HistoryClass):
     A class that describes a facility.
 
     Attributes:
-            id (int): Unique ID of facility.
+            type (str): Type of facility.
             name (str): Name of facility.
             dimensions (Dimensions): Dimensions of facility.
             room_inventory (Dict[int, Room]):
                     Dictionary of rooms that are contained in facility.
     """
-
-    id: int
+    type: str
     name: str
     dimensions: Dimensions
     room_inventory: Dict[int, Room] = {}
 
-    def __init__(self, name: str, dimensions: Dimensions):
+    def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
+        self.type = type
         self.name = name
         self.dimensions = dimensions
+
+    def GetType(self) -> str:
+        """
+        Get facility type.
+
+        Returns:
+                type (str): Facility type.
+        """
+        return self.type
+
+    def GetName(self) -> str:
+        """
+        Get facility name.
+
+        Returns:
+                name (str): Facility name.
+        """
+        return self.name
 
     def GetDimensions(self) -> Dimensions:
         """
         Get dimensions of the facility instance.
 
         Returns:
-                Dimensions: The dimensions assigned to the instance.
+                dimensions (Dimensions): The dimensions assigned to the instance.
         """
         return self.dimensions
 
     def AddRoom(self, room: Room):
-        """ """
-        pass
+        """
+        Add a room to the facility's room inventory.
+        
+        Args:
+                room (Room): Room to be added to inventory.
+        """
+        self.room_inventory[room.id] = {room}
+    
+    def RemoveRoom(self, roomID: int):
+        """
+        Remove a room to the facility's room inventory.
+        
+        Args:
+                roomID (int): ID of room to be removed from inventory.
+        """
+        del self.room_inventory[roomID]
+    
+    def GetRoomInventory(self) -> Dict[int, Room]:
+        """
+        Get the facility's room inventory.
+        
+        Returns:
+                room_inventory (Dict[int, Room]):
+                        Dictionary of rooms that are contained in facility.
+        """
+        return self.room_inventory
 
     # def PresentEntryInventory(self):
     # 	pass

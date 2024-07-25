@@ -12,13 +12,34 @@ class Dimensions:
         self.z: float = z_in
 
     def PrintDimensions(self):
+        """
+        Print x, y, and z dimensions.
+        """
         print(self.GetX(), self.GetY(), self.GetZ())
 
     def GetX(self) -> float:
+        """
+        Get x dimension.
+
+        Returns:
+            x (float): x dimension.
+        """
         return self.x
 
     def GetY(self) -> float:
+        """
+        Get y dimension.
+
+        Returns:
+            y (float): y dimension.
+        """
         return self.y
 
     def GetZ(self) -> float:
+        """
+        Get z dimension.
+
+        Returns:
+            z (float): z dimension.
+        """
         return self.z
