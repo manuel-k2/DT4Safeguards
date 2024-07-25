@@ -57,7 +57,7 @@ Modules
 .. automodule:: project.projecttypes.command
     :members:
 
-.. automodule:: project.projecttypes.transportcommand
+.. automodule:: project.projecttypes.transportcmd
     :members:
 
 .. automodule:: project.projecttypes.location

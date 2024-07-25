@@ -13,7 +13,7 @@ class Facility(HistoryClass):
         type (str): Type of facility.
         name (str): Name of facility.
         dimensions (Dimensions): Dimensions of facility.
-        room_inventory (Dict[int, Room]): Dictionary of rooms that are 
+        room_inventory (Dict[int, Room]): Dictionary of rooms that are
         contained in facility.
     """
 
@@ -78,7 +78,7 @@ class Facility(HistoryClass):
         Get the facility's room inventory.
 
         Returns:
-            Dict[int, Room]: Dictionary of rooms that are contained 
+            Dict[int, Room]: Dictionary of rooms that are contained
             in facility.
         """
         if not self.room_inventory:
