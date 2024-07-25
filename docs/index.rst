@@ -39,5 +39,20 @@ Results are then visible with a browser at http://127.0.0.1:8050/.
 Modules
 -------
 
-.. automodule:: 
+.. automodule:: project.app
+    :members:
+
+.. automodule:: project.model.monitoringsystem
+    :members:
+
+.. automodule:: project.model.historyclass
+    :members:
+
+.. automodule:: project.model.facility
+    :members:
+
+.. automodule:: project.model.room
+    :members:
+
+.. automodule:: project.projecttypes.command
     :members:
