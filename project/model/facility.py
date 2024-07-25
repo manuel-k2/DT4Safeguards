@@ -2,7 +2,6 @@ from typing import Dict
 
 from model.room import Room
 from model.historyclass import HistoryClass
-
 from projecttypes.dimensions import Dimensions
 
 
@@ -11,11 +10,11 @@ class Facility(HistoryClass):
     A class that describes a facility.
 
     Attributes:
-            type (str): Type of facility.
-            name (str): Name of facility.
-            dimensions (Dimensions): Dimensions of facility.
-            room_inventory (Dict[int, Room]):
-                    Dictionary of rooms that are contained in facility.
+        type (str): Type of facility.
+        name (str): Name of facility.
+        dimensions (Dimensions): Dimensions of facility.
+        room_inventory (Dict[int, Room]): Dictionary of rooms that are 
+        contained in facility.
     """
 
     type: str
@@ -34,7 +33,7 @@ class Facility(HistoryClass):
         Get facility type.
 
         Returns:
-                type (str): Facility type.
+            str: Facility type.
         """
         return self.type
 
@@ -43,7 +42,7 @@ class Facility(HistoryClass):
         Get facility name.
 
         Returns:
-                name (str): Facility name.
+            str: Facility name.
         """
         return self.name
 
@@ -52,8 +51,7 @@ class Facility(HistoryClass):
         Get dimensions of the facility instance.
 
         Returns:
-                dimensions (Dimensions):
-                    The dimensions assigned to the instance.
+            Dimensions: The dimensions assigned to the instance.
         """
         return self.dimensions
 
@@ -62,16 +60,16 @@ class Facility(HistoryClass):
         Add a room to the facility's room inventory.
 
         Args:
-                room (Room): Room to be added to inventory.
+            room (Room): Room to be added to inventory.
         """
         self.room_inventory[room.id] = room
 
     def RemoveRoom(self, roomID: int):
         """
-        Remove a room to the facility's room inventory.
+        Remove a room from the facility's room inventory.
 
         Args:
-                roomID (int): ID of room to be removed from inventory.
+            roomID (int): ID of room to be removed from inventory.
         """
         del self.room_inventory[roomID]
 
@@ -80,8 +78,8 @@ class Facility(HistoryClass):
         Get the facility's room inventory.
 
         Returns:
-                room_inventory (Dict[int, Room]):
-                        Dictionary of rooms that are contained in facility.
+            Dict[int, Room]: Dictionary of rooms that are contained 
+            in facility.
         """
         if not self.room_inventory:
             print("Inventory is empty.")
@@ -91,4 +89,4 @@ class Facility(HistoryClass):
         return self.room_inventory
 
     # def PresentEntryInventory(self):
-    # 	pass
+    #     pass
