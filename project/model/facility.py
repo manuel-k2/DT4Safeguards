@@ -24,40 +24,67 @@ class Facility(HistoryClass):
 
     def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
-        self.type = type
-        self.name = name
-        self.dimensions = dimensions
+        self.SetType(type)
+        self.SetName(name)
+        self.SetDimensions(dimensions)
 
+    def SetType(self, type: str):
+        """
+        Sets facility type.
+
+        Args:
+            type (str): Facility type.
+        """
+        self.type = type
+    
     def GetType(self) -> str:
         """
-        Get facility type.
+        Gets facility type.
 
         Returns:
             str: Facility type.
         """
         return self.type
 
+    def SetName(self, name: str):
+        """
+        Sets facility name.
+
+        Args:
+            name (str): Facility name.
+        """
+        self.name = name
+    
     def GetName(self) -> str:
         """
-        Get facility name.
+        Gets facility name.
 
         Returns:
             str: Facility name.
         """
         return self.name
 
+    def SetDimensions(self, dimensions: Dimensions):
+        """
+        Sets dimensions of the facility instance.
+
+        Args:
+            dimensions (Dimensions): Dimensions assigned to the facility instance.
+        """
+        self.dimensions = dimensions
+    
     def GetDimensions(self) -> Dimensions:
         """
-        Get dimensions of the facility instance.
+        Gets dimensions of the facility instance.
 
         Returns:
-            Dimensions: The dimensions assigned to the instance.
+            Dimensions: Dimensions assigned to the facility instance.
         """
         return self.dimensions
 
     def AddRoom(self, room: Room):
         """
-        Add a room to the facility's room inventory.
+        Adds a room to the facility's room inventory.
 
         Args:
             room (Room): Room to be added to inventory.
@@ -66,7 +93,7 @@ class Facility(HistoryClass):
 
     def RemoveRoom(self, roomID: int):
         """
-        Remove a room from the facility's room inventory.
+        Removes a room from the facility's room inventory.
 
         Args:
             roomID (int): ID of room to be removed from inventory.
@@ -75,7 +102,7 @@ class Facility(HistoryClass):
 
     def GetRoomInventory(self) -> Dict[int, Room]:
         """
-        Get the facility's room inventory.
+        Gets the facility's room inventory.
 
         Returns:
             Dict[int, Room]: Dictionary of rooms that are contained
