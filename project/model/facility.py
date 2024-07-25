@@ -52,7 +52,8 @@ class Facility(HistoryClass):
         Get dimensions of the facility instance.
 
         Returns:
-                dimensions (Dimensions): The dimensions assigned to the instance.
+                dimensions (Dimensions):
+                    The dimensions assigned to the instance.
         """
         return self.dimensions
 
