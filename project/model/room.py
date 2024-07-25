@@ -5,7 +5,7 @@ from projecttypes.dimensions import Dimensions
 
 class Room(HistoryClass):
     """
-    A class that describes a roon.
+    A class that describes a room.
 
     Attributes:
             type (str): Type of facility.

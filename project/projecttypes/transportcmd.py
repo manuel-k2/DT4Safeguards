@@ -16,6 +16,7 @@ class TransportCmd(Command):
 
     def __init__(self, origin: Location, destination: Location):
         super().__init__()
+        self.type = "transport"
         self.origin = origin
         self.destination = destination
 

@@ -1,6 +1,6 @@
 class Dimensions:
     """
-    A class that specifies dimensions of instances of different classes.
+    A class that specifies dimensions of an instance.
 
     Attributes:
             x, y, z (float): Dimensions in x, y and z direction.
