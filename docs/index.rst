@@ -3,7 +3,7 @@ Welcome to the DT4Safeguards documentation!
 
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
 
