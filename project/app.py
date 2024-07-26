@@ -1,6 +1,6 @@
 from model.monitoringsystem import MonitoringSystem
 from model.facility import Facility
-from model.room import Room
+from model.facility import Room
 
 from projecttypes.dimensions import Dimensions
 
