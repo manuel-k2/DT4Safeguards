@@ -26,9 +26,9 @@ class Container(HistoryClass):
         self, type: str, name: str, dimensions: Dimensions, location: Location
     ):
         super().__init__()
-        self.type = type
-        self.name = name
-        self.dimensions = dimensions
+        self.SetType(type)
+        self.SetName(name)
+        self.SetDimensions(dimensions)
         self.SetLocation(location)
 
     def SetType(self, type: str):

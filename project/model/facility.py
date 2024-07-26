@@ -99,7 +99,12 @@ class Facility(HistoryClass):
         Args:
             roomID (int): ID of room to be removed from inventory.
         """
-        del self.room_inventory[roomID]
+        if roomID not in self.room_inventory:
+            raise KeyError(f"Room with ID {roomID} not found.")
+        if len(self.room_inventory) == 1 and roomID in self.room_inventory:
+            self.room_inventory.clear()
+        else:
+            del self.room_inventory[roomID]
 
     def GetRoomInventory(self) -> Dict[int, Room]:
         """
