@@ -2,7 +2,9 @@ from typing import Dict
 
 from model.room import Room
 from model.historyclass import HistoryClass
+
 from projecttypes.dimensions import Dimensions
+from project.projecttypes.location import Location
 
 
 class Facility(HistoryClass):
@@ -90,6 +92,11 @@ class Facility(HistoryClass):
         Args:
             room (Room): Room to be added to inventory.
         """
+        # Set new location to added room
+        room_location = Location().SetFacility(self)
+        room.SetLocation(room_location)
+
+        # Add room to inventory
         self.room_inventory[room.id] = room
 
     def RemoveRoom(self, roomID: int):

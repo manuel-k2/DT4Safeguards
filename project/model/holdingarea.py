@@ -92,8 +92,14 @@ class HoldingArea(HistoryClass):
         if self.occupationStatus == True:
             print("Holding Area is already occupied.")
         else:
+            # Set new location to added container
+            container_location = Location().SetFacility(self.location.GetFacility())
+            container_location = container_location.SetRoom(self.location.GetRoom())
+            container_location = container_location.SetHoldingArea(self)
+            container.SetLocation(container_location)
+            
+            # Add container to inventory
             self.container_inventory[container.id] = container
-            container.SetLocation()
             self.occupationStatus = True
             print(f"ID: {container.id}, Container: {container} added to holding area.")
 

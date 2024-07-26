@@ -112,6 +112,12 @@ class Room(HistoryClass):
             holdingArea (HoldingArea):
             Holding area to be added to inventory.
         """
+        # Set new location to added holding area
+        holdingArea_location = Location().SetFacility(self.location.GetFacility())
+        holdingArea_location = holdingArea_location.SetRoom(self)
+        holdingArea.SetLocation(holdingArea_location)
+
+        # Add holding area to inventory
         self.holdingArea_inventory[holdingArea.id] = holdingArea
 
     def RemoveHoldingArea(self, holdingAreaID: int):
