@@ -427,7 +427,7 @@ class HoldingArea(HistoryClass):
             )
         self.container_inventory.clear()
         self.occupationStatus = False
-    
+
     def GetContainer(self) -> "Container":
         """
         Gets the container contained in holding area.
@@ -652,9 +652,7 @@ class Location:
         if self.holdingArea is not None:
             hAN = self.holdingArea.name
             hAID = self.holdingArea.id
-            print(
-                f"""Holding Area: {hAN}, ID: {hAID}"""
-            )
+            print(f"""Holding Area: {hAN}, ID: {hAID}""")
 
 
 class Command(IDClass):
