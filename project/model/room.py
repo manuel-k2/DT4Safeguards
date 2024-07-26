@@ -8,9 +8,9 @@ class Room(HistoryClass):
     A class that describes a room.
 
     Attributes:
-            type (str): Type of room.
-            name (str): Name of room.
-            dimensions (Dimensions): Dimensions of room.
+        type (str): Type of room.
+        name (str): Name of room.
+        dimensions (Dimensions): Dimensions of room.
     """
 
     type: str
@@ -22,7 +22,7 @@ class Room(HistoryClass):
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
-    
+
     def SetType(self, type: str):
         """
         Sets room type.
@@ -31,7 +31,7 @@ class Room(HistoryClass):
             type (str): Room type.
         """
         self.type = type
-    
+
     def GetType(self) -> str:
         """
         Gets room type.
@@ -49,7 +49,7 @@ class Room(HistoryClass):
             name (str): Room name.
         """
         self.name = name
-    
+
     def GetName(self) -> str:
         """
         Gets room name.
@@ -67,7 +67,7 @@ class Room(HistoryClass):
             dimensions (Dimensions): Dimensions assigned to the room instance.
         """
         self.dimensions = dimensions
-    
+
     def GetDimensions(self) -> Dimensions:
         """
         Gets dimensions of the room instance.

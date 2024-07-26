@@ -7,8 +7,8 @@ class Location:
     A class that specifies the location of an instance.
 
     Attributes:
-            facility (Facility): Corresponding facility instance.
-            room (Room): Corresponding room instance.
+        facility (Facility): Corresponding facility instance.
+        room (Room): Corresponding room instance.
     """
 
     facility: Facility

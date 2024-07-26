@@ -16,18 +16,21 @@ class Container(HistoryClass):
             location (Location): Location of container.
 
     """
+
     type: str
     name: str
     dimensions: Dimensions
     location: Location
 
-    def __init__(self, type: str, name: str, dimensions: Dimensions, location: Location):
+    def __init__(
+        self, type: str, name: str, dimensions: Dimensions, location: Location
+    ):
         super().__init__()
         self.type = type
         self.name = name
         self.dimensions = dimensions
         self.SetLocation(location)
-    
+
     def SetType(self, type: str):
         """
         Sets container type.
@@ -36,7 +39,7 @@ class Container(HistoryClass):
             type (str): Container type.
         """
         self.type = type
-    
+
     def GetType(self) -> str:
         """
         Gets container type.
@@ -54,7 +57,7 @@ class Container(HistoryClass):
             name (str): Container name.
         """
         self.name = name
-    
+
     def GetName(self) -> str:
         """
         Gets container name.
@@ -69,10 +72,11 @@ class Container(HistoryClass):
         Sets dimensions of the container instance.
 
         Args:
-            dimensions (Dimensions): Dimensions assigned to the container instance.
+            dimensions (Dimensions):
+            Dimensions assigned to the container instance.
         """
         self.dimensions = dimensions
-    
+
     def GetDimensions(self) -> Dimensions:
         """
         Gets dimensions of the container instance.
@@ -81,7 +85,7 @@ class Container(HistoryClass):
             Dimensions: Dimensions assigned to the container instance.
         """
         return self.dimensions
-    
+
     def SetLocation(self, location: Location):
         """
         Sets container location.
@@ -107,9 +111,9 @@ class Container(HistoryClass):
 
         Args:
             cmd (Command): Instance of command to be processed.
-        
+
         """
         if cmd.type == "transport":
             self.SetLocation(cmd.destination)
-        return super().Activation(cmd)
-        
+
+        super().Activation(cmd)

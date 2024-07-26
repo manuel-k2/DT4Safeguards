@@ -8,8 +8,8 @@ class Command(IDClass):
     The base class for all instances that specify commands.
 
     Attributes:
-            type (str): Type of command.
-            targetID (int): ID of instance that is targeted by command.
+        type (str): Type of command.
+        targetID (int): ID of instance that is targeted by command.
     """
 
     type: str
@@ -20,13 +20,14 @@ class Command(IDClass):
         self.type = cmdType
         self.targetID = targetID
 
+
 class TransportCmd(Command):
     """
     A class that specifies a transport command from an origin to a destination.
 
     Attributes:
-            origin (Location): Origin of transport.
-            destination (Location): Destination of transport.
+        origin (Location): Origin of transport.
+        destination (Location): Destination of transport.
     """
 
     origin: Location

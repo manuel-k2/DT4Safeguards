@@ -36,7 +36,7 @@ class Facility(HistoryClass):
             type (str): Facility type.
         """
         self.type = type
-    
+
     def GetType(self) -> str:
         """
         Gets facility type.
@@ -54,7 +54,7 @@ class Facility(HistoryClass):
             name (str): Facility name.
         """
         self.name = name
-    
+
     def GetName(self) -> str:
         """
         Gets facility name.
@@ -69,10 +69,11 @@ class Facility(HistoryClass):
         Sets dimensions of the facility instance.
 
         Args:
-            dimensions (Dimensions): Dimensions assigned to the facility instance.
+            dimensions (Dimensions):
+            Dimensions assigned to the facility instance.
         """
         self.dimensions = dimensions
-    
+
     def GetDimensions(self) -> Dimensions:
         """
         Gets dimensions of the facility instance.

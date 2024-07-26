@@ -14,7 +14,7 @@ class MonitoringSystem:
 
     Attributes:
         _registry (Dict[int, IDClass]): Class-level dictionary to store
-            instances of IDClass, indexed by integer IDs.
+        instances of IDClass, indexed by integer IDs.
         _id_counter (int): Class-level counter to generate unique IDs.
     """
 
@@ -50,7 +50,7 @@ class MonitoringSystem:
 
         Raises:
             InstanceNotFoundError: If the instance with the
-                given ID is not found.
+            given ID is not found.
         """
         if id not in cls._registry:
             print(f"Instance with ID '{id}' not found.")
@@ -73,7 +73,7 @@ class MonitoringSystem:
 class IDClass:
     """
     The base class for all registrable instances
-        that get assigned a unique identifier.
+    that get assigned a unique identifier.
 
     Attributes:
         id (int): The unique identifier for the instance.
