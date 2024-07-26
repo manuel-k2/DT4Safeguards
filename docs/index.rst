@@ -45,22 +45,7 @@ Modules
 .. automodule:: project.model.monitoringsystem
     :members:
 
-.. automodule:: project.model.historyclass
-    :members:
-
-.. automodule:: project.model.facility
-    :members:
-
-.. automodule:: project.model.room
-    :members:
-
-.. automodule:: project.projecttypes.command
-    :members:
-
-.. automodule:: project.projecttypes.transportcmd
-    :members:
-
-.. automodule:: project.projecttypes.location
+.. automodule:: project.model.components
     :members:
 
 .. automodule:: project.projecttypes.dimensions
