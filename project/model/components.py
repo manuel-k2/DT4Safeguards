@@ -64,6 +64,7 @@ class Facility(HistoryClass):
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
+        self.room_inventory: Dict[int, "Room"] = {}
 
     def SetType(self, type: str):
         """
@@ -191,6 +192,7 @@ class Room(HistoryClass):
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
+        self.holdingArea_inventory: Dict[int, "HoldingArea"] = {}
 
     def SetType(self, type: str):
         """
@@ -342,6 +344,7 @@ class HoldingArea(HistoryClass):
         super().__init__()
         self.SetName(name)
         self.SetOccupationStatus(False)
+        self.container_inventory: Dict[int, "Container"] = {}
 
     def SetName(self, name: str):
         """

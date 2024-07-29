@@ -6,10 +6,10 @@ class Dimensions:
             x, y, z (float): Dimensions in x, y and z direction.
     """
 
-    def __init__(self, x_in, y_in, z_in):
-        self.x: float = x_in
-        self.y: float = y_in
-        self.z: float = z_in
+    def __init__(self, x, y, z):
+        self.x: float = x
+        self.y: float = y
+        self.z: float = z
 
     def PrintDimensions(self):
         """
