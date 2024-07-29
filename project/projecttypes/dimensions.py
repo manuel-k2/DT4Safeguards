@@ -22,7 +22,7 @@ class Dimensions:
         Get x dimension.
 
         Returns:
-            x (float): x dimension.
+            float: x dimension.
         """
         return self.x
 
@@ -31,7 +31,7 @@ class Dimensions:
         Get y dimension.
 
         Returns:
-            y (float): y dimension.
+            float: y dimension.
         """
         return self.y
 
@@ -40,6 +40,6 @@ class Dimensions:
         Get z dimension.
 
         Returns:
-            z (float): z dimension.
+            float: z dimension.
         """
         return self.z
