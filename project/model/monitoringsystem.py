@@ -50,7 +50,7 @@ class MonitoringSystem:
 
         Raises:
             InstanceNotFoundError: If the instance with the
-            given ID is not found.
+                given ID is not found.
         """
         if id not in cls._registry:
             print(f"Instance with ID '{id}' not found.")

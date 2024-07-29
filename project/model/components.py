@@ -14,7 +14,7 @@ class HistoryClass(IDClass):
 
     Attributes:
         registry (Dict[int, dict]): Dictionary to store command
-        specifications.
+            specifications.
     """
 
     registry: Dict[int, dict] = field(default_factory=dict)
@@ -37,7 +37,7 @@ class HistoryClass(IDClass):
             cmd_id (int): Unique ID of processed command.
             cmd_type (str): Type of processed command.
             target_id (int): Unique ID of instance targeted by
-            processed command.
+                processed command.
         """
         self.registry[cmdID] = {"cmd_type": cmdType, "target_id": targetID}
 
@@ -51,7 +51,7 @@ class Facility(HistoryClass):
         name (str): Name of facility.
         dimensions (Dimensions): Dimensions of facility.
         room_inventory (Dict[int, Room]): Dictionary of rooms that are
-        contained in facility.
+            contained in facility.
     """
 
     type: str
@@ -107,7 +107,7 @@ class Facility(HistoryClass):
 
         Args:
             dimensions (Dimensions):
-            Dimensions assigned to the facility instance.
+                Dimensions assigned to the facility instance.
         """
         self.dimensions = dimensions
 
@@ -154,7 +154,7 @@ class Facility(HistoryClass):
 
         Returns:
             Dict[int, Room]: Dictionary of rooms that are contained
-            in facility.
+                in facility.
         """
         if not self.room_inventory:
             print("Inventory is empty.")
@@ -177,7 +177,7 @@ class Room(HistoryClass):
         dimensions (Dimensions): Dimensions of room.
         location (Location): Location of room.
         holdingarea_inventory (Dict[int, HoldingArea]): Dictionary of
-        holding areas that are contained in room.
+            holding areas that are contained in room.
     """
 
     type: str
@@ -270,7 +270,7 @@ class Room(HistoryClass):
 
         Args:
             holdingArea (HoldingArea):
-            Holding area to be added to inventory.
+                Holding area to be added to inventory.
         """
         # Set new location to added holding area
         holdingArea_location = Location(self.location.GetFacility(), self)
@@ -285,7 +285,7 @@ class Room(HistoryClass):
 
         Args:
             holdingAreaID (int):
-            ID of holding area to be removed from inventory.
+                ID of holding area to be removed from inventory.
         """
         if holdingAreaID not in self.holdingArea_inventory:
             raise KeyError(f"Holding area with ID {holdingAreaID} not found.")
@@ -303,7 +303,7 @@ class Room(HistoryClass):
 
         Returns:
             Dict[int, HoldingArea]:
-            Dictionary of holding areas that are contained in room.
+                Dictionary of holding areas that are contained in room.
         """
         if not self.holdingArea_inventory:
             print("Inventory is empty.")
@@ -328,9 +328,9 @@ class HoldingArea(HistoryClass):
         name (str): Name of holding area.
         location (Location): Location of holding area.
         occupationStatus (bool):
-        True if holding area is occupied by container, False if not.
+            True if holding area is occupied by container, False if not.
         container_inventory (Dict[int, Container]):
-        Dictionary of container in holding area.
+            Dictionary of container in holding area.
     """
 
     name: str
@@ -434,7 +434,7 @@ class HoldingArea(HistoryClass):
 
         Returns:
             Container:
-            Container that is contained in holding area.
+                Container that is contained in holding area.
         """
         if self.occupationStatus is False:
             print("No container in holding area.")
@@ -511,7 +511,7 @@ class Container(HistoryClass):
 
         Args:
             dimensions (Dimensions):
-            Dimensions assigned to the container instance.
+                Dimensions assigned to the container instance.
         """
         self.dimensions = dimensions
 
@@ -566,7 +566,7 @@ class Location:
     Attributes:
         facility (Facility): Corresponding   facility instance.
         room (Room): Corresponding room instance.
-        holdingArea(HoldingArea): Corresponding holding area instance.
+        holdingArea (HoldingArea): Corresponding holding area instance.
     """
 
     facility: Facility
