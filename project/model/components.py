@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict
 
 from model.monitoringsystem import IDClass
@@ -39,16 +39,16 @@ class HistoryClass(IDClass):
             cmd (Command): Instance of command to be processed.
         """
         self.registry[cmd.id] = {"cmdType": cmd.type, "target": cmd.target}
-    
+
     def GetHistory(self) -> Dict[int, dict]:
         """
         Gets history.
-        
+
         Returns:
             Dict[int, dict]: History of an instance.
         """
         return self.registry
-    
+
     def ShowHistory(self) -> None:
         """
         Shows history of instance.
@@ -736,7 +736,9 @@ class TransportCmd(Command):
         destination (Location): Destination of transport.
     """
 
-    def __init__(self, target: HistoryClass, origin: Location, destination: Location):
+    def __init__(
+        self, target: HistoryClass, origin: Location, destination: Location
+    ):
         super().__init__("transport", target)
         self.SetOrigin(origin)
         self.SetDestination(destination)

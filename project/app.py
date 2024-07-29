@@ -3,7 +3,6 @@ from model.components import Facility
 from model.components import Room
 from model.components import HoldingArea
 from model.components import Container
-from model.components import Location
 from model.components import TransportCmd
 
 from projecttypes.dimensions import Dimensions
@@ -23,7 +22,9 @@ room_2 = Room(type="Storage", name="Room 2", dimensions=Dimensions(1, 1, 1))
 holdingArea_3 = HoldingArea(name="Bay 1")
 
 facility_2 = Facility(
-    type="Geological repository", name="Facility 2", dimensions=Dimensions(1, 1, 1)
+    type="Geological repository",
+    name="Facility 2",
+    dimensions=Dimensions(1, 1, 1),
 )
 
 room_3 = Room(type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1))
