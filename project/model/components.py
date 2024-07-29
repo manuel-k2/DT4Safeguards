@@ -17,9 +17,11 @@ class HistoryClass(IDClass):
             specifications.
     """
 
-    registry: Dict[int, dict] = field(default_factory=dict)
+    def __init__(self):
+        super().__init__()
+        self.registry: Dict[int, dict] = {}
 
-    def Activation(self, cmd: "Command"):
+    def Activation(self, cmd: "Command") -> None:
         """
         Registers a command and activates certain functions based on
         the command type.
@@ -27,19 +29,35 @@ class HistoryClass(IDClass):
         Args:
             cmd (Command): Instance of command to be processed.
         """
-        self.UpdateHistory(cmd.type, cmd.id, cmd.targetID)
+        self.UpdateHistory(cmd)
 
-    def UpdateHistory(self, cmdID: int, cmdType: str, targetID: int):
+    def UpdateHistory(self, cmd: "Command") -> None:
         """
         Stores command specifications in a dictionary.
 
         Args:
-            cmd_id (int): Unique ID of processed command.
-            cmd_type (str): Type of processed command.
-            target_id (int): Unique ID of instance targeted by
-                processed command.
+            cmd (Command): Instance of command to be processed.
         """
-        self.registry[cmdID] = {"cmd_type": cmdType, "target_id": targetID}
+        self.registry[cmd.id] = {"cmdType": cmd.type, "target": cmd.target}
+    
+    def GetHistory(self) -> Dict[int, dict]:
+        """
+        Gets history.
+        
+        Returns:
+            Dict[int, dict]: History of an instance.
+        """
+        return self.registry
+    
+    def ShowHistory(self) -> None:
+        """
+        Shows history of instance.
+        """
+        if not self.registry:
+            print("Registry is empty.")
+        else:
+            for id, instance in self.registry.items():
+                print(f"Command with ID: {id}, {instance}")
 
 
 class Facility(HistoryClass):
@@ -54,11 +72,6 @@ class Facility(HistoryClass):
             contained in facility.
     """
 
-    type: str
-    name: str
-    dimensions: Dimensions
-    room_inventory: Dict[int, "Room"] = {}
-
     def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
         self.SetType(type)
@@ -66,7 +79,7 @@ class Facility(HistoryClass):
         self.SetDimensions(dimensions)
         self.room_inventory: Dict[int, "Room"] = {}
 
-    def SetType(self, type: str):
+    def SetType(self, type: str) -> None:
         """
         Sets facility type.
 
@@ -84,7 +97,7 @@ class Facility(HistoryClass):
         """
         return self.type
 
-    def SetName(self, name: str):
+    def SetName(self, name: str) -> None:
         """
         Sets facility name.
 
@@ -102,7 +115,7 @@ class Facility(HistoryClass):
         """
         return self.name
 
-    def SetDimensions(self, dimensions: Dimensions):
+    def SetDimensions(self, dimensions: Dimensions) -> None:
         """
         Sets dimensions of the facility instance.
 
@@ -121,7 +134,7 @@ class Facility(HistoryClass):
         """
         return self.dimensions
 
-    def AddRoom(self, room: "Room"):
+    def AddRoom(self, room: "Room") -> None:
         """
         Adds a room to the facility's room inventory.
 
@@ -135,7 +148,7 @@ class Facility(HistoryClass):
         # Add room to inventory
         self.room_inventory[room.id] = room
 
-    def RemoveRoom(self, roomID: int):
+    def RemoveRoom(self, roomID: int) -> None:
         """
         Removes a room from the facility's room inventory.
 
@@ -164,8 +177,8 @@ class Facility(HistoryClass):
                 print(f"ID: {id}, Room: {room.name}")
         return self.room_inventory
 
-    # def PresentEntryInventory(self):
-    #     pass
+    def PresentEntryInventory(self):
+        pass
 
 
 class Room(HistoryClass):
@@ -181,12 +194,6 @@ class Room(HistoryClass):
             holding areas that are contained in room.
     """
 
-    type: str
-    name: str
-    dimensions: Dimensions
-    location: "Location"
-    holdingArea_inventory: Dict[int, "HoldingArea"] = {}
-
     def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
         self.SetType(type)
@@ -194,7 +201,7 @@ class Room(HistoryClass):
         self.SetDimensions(dimensions)
         self.holdingArea_inventory: Dict[int, "HoldingArea"] = {}
 
-    def SetType(self, type: str):
+    def SetType(self, type: str) -> None:
         """
         Sets room type.
 
@@ -212,7 +219,7 @@ class Room(HistoryClass):
         """
         return self.type
 
-    def SetName(self, name: str):
+    def SetName(self, name: str) -> None:
         """
         Sets room name.
 
@@ -230,7 +237,7 @@ class Room(HistoryClass):
         """
         return self.name
 
-    def SetDimensions(self, dimensions: Dimensions):
+    def SetDimensions(self, dimensions: Dimensions) -> None:
         """
         Sets dimensions of the room instance.
 
@@ -248,7 +255,7 @@ class Room(HistoryClass):
         """
         return self.dimensions
 
-    def SetLocation(self, location: "Location"):
+    def SetLocation(self, location: "Location") -> None:
         """
         Sets room location. Called when added to a facility.
 
@@ -266,7 +273,7 @@ class Room(HistoryClass):
         """
         return self.location
 
-    def AddHoldingArea(self, holdingArea: "HoldingArea"):
+    def AddHoldingArea(self, holdingArea: "HoldingArea") -> None:
         """
         Adds a holding area to the rooms's holding area inventory.
 
@@ -281,7 +288,7 @@ class Room(HistoryClass):
         # Add holding area to inventory
         self.holdingArea_inventory[holdingArea.id] = holdingArea
 
-    def RemoveHoldingArea(self, holdingAreaID: int):
+    def RemoveHoldingArea(self, holdingAreaID: int) -> None:
         """
         Removes a holding area from the rooms's holding area inventory.
 
@@ -335,18 +342,13 @@ class HoldingArea(HistoryClass):
             Dictionary of container in holding area.
     """
 
-    name: str
-    location: "Location"
-    occupationStatus: bool
-    container_inventory: Dict[int, "Container"] = {}
-
     def __init__(self, name: str):
         super().__init__()
         self.SetName(name)
         self.SetOccupationStatus(False)
         self.container_inventory: Dict[int, "Container"] = {}
 
-    def SetName(self, name: str):
+    def SetName(self, name: str) -> None:
         """
         Sets holding area name.
 
@@ -364,7 +366,7 @@ class HoldingArea(HistoryClass):
         """
         return self.name
 
-    def SetLocation(self, location: "Location"):
+    def SetLocation(self, location: "Location") -> None:
         """
         Sets holding area location. Called when added to room.
 
@@ -382,7 +384,7 @@ class HoldingArea(HistoryClass):
         """
         return self.location
 
-    def SetOccupationStatus(self, occupationStatus: bool):
+    def SetOccupationStatus(self, occupationStatus: bool) -> None:
         """
         Sets occupation status to true or false.
 
@@ -400,7 +402,7 @@ class HoldingArea(HistoryClass):
         """
         return self.occupationStatus
 
-    def AddContainer(self, container: "Container"):
+    def AddContainer(self, container: "Container") -> None:
         """
         Adds container to holding area.
 
@@ -420,7 +422,7 @@ class HoldingArea(HistoryClass):
             self.container_inventory[container.id] = container
             self.occupationStatus = True
 
-    def RemoveContainer(self):
+    def RemoveContainer(self) -> None:
         """
         Removes container from holding area.
         """
@@ -460,11 +462,6 @@ class Container(HistoryClass):
 
     """
 
-    type: str
-    name: str
-    dimensions: Dimensions
-    location: "Location"
-
     def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
         self.SetType(type)
@@ -472,7 +469,7 @@ class Container(HistoryClass):
         self.SetDimensions(dimensions)
         self.SetLocation(None)
 
-    def SetType(self, type: str):
+    def SetType(self, type: str) -> None:
         """
         Sets container type.
 
@@ -490,7 +487,7 @@ class Container(HistoryClass):
         """
         return self.type
 
-    def SetName(self, name: str):
+    def SetName(self, name: str) -> None:
         """
         Sets container name.
 
@@ -508,7 +505,7 @@ class Container(HistoryClass):
         """
         return self.name
 
-    def SetDimensions(self, dimensions: Dimensions):
+    def SetDimensions(self, dimensions: Dimensions) -> None:
         """
         Sets dimensions of the container instance.
 
@@ -527,7 +524,7 @@ class Container(HistoryClass):
         """
         return self.dimensions
 
-    def SetLocation(self, location: "Location"):
+    def SetLocation(self, location: "Location") -> None:
         """
         Sets container location.
 
@@ -545,7 +542,7 @@ class Container(HistoryClass):
         """
         return self.location
 
-    def Activation(self, cmd: "Command"):
+    def Activation(self, cmd: "Command") -> None:
         """
         Activates certain functions based on
         the command type.
@@ -554,10 +551,34 @@ class Container(HistoryClass):
             cmd (Command): Instance of command to be processed.
 
         """
-        if cmd.type == "transport":
+        if self.id is not cmd.target.id:
+            raise KeyError(
+                f"""Target ID {cmd.target.id}
+                does not match this instance's ID {self.id}."""
+            )
+        elif type(cmd) is TransportCmd:
+            # Activate components at origin of transport
+            current_holdingArea = self.GetLocation().GetHoldingArea()
+            current_holdingArea.Activation(cmd)
+            current_room = self.GetLocation().GetRoom()
+            current_room.Activation(cmd)
+            current_facility = self.GetLocation().GetFacility()
+            current_facility.Activation(cmd)
+
+            # Activate components at destination of transport
+            destination_facility = cmd.destination.GetFacility()
+            destination_facility.Activation(cmd)
+
+            destination_room = cmd.destination.GetRoom()
+            destination_room.Activation(cmd)
+
+            destination_holdingArea = cmd.destination.GetHoldingArea()
+            destination_holdingArea.Activation(cmd)
+
+            # Update own location to destination
             self.SetLocation(cmd.destination)
 
-        super().Activation(cmd)
+        super().UpdateHistory(cmd)
 
 
 class Location:
@@ -571,10 +592,6 @@ class Location:
         room (Room): Corresponding room instance.
         holdingArea (HoldingArea): Corresponding holding area instance.
     """
-
-    facility: Facility
-    room: Room
-    holdingArea: HoldingArea
 
     def __init__(self, *args):
         if len(args) > 0:
@@ -590,9 +607,9 @@ class Location:
         else:
             self.SetHoldingArea(None)
 
-    def SetFacility(self, facility: Facility):
+    def SetFacility(self, facility: Facility) -> None:
         """
-        Set facility.
+        Sets facility.
 
         Args:
                 facility (Facility): Facility instance.
@@ -601,16 +618,16 @@ class Location:
 
     def GetFacility(self) -> Facility:
         """
-        Get facility.
+        Gets facility.
 
         Returns:
                 facility: Facility instance.
         """
         return self.facility
 
-    def SetRoom(self, room: Room):
+    def SetRoom(self, room: Room) -> None:
         """
-        Set room.
+        Sets room.
 
         Args:
                 room (Room): Room instance.
@@ -619,7 +636,7 @@ class Location:
 
     def GetRoom(self) -> Room:
         """
-        Get room.
+        Gets room.
 
         Returns:
                 Room: Room instance.
@@ -628,7 +645,7 @@ class Location:
 
     def SetHoldingArea(self, holdingArea: HoldingArea):
         """
-        Set holding area.
+        Sets holding area.
 
         Args:
                 holdingArea (HoldingArea): Holding area instance.
@@ -637,16 +654,16 @@ class Location:
 
     def GetHoldingArea(self) -> HoldingArea:
         """
-        Get holding area.
+        Gets holding area.
 
         Returns:
                 HodingArea: Holding area instance.
         """
         return self.holdingArea
 
-    def PrintLocation(self):
+    def PrintLocation(self) -> None:
         """
-        Print facility and room IDs of location.
+        Prints facility and room IDs of location.
         """
         if self.facility is not None:
             print(f"Facility: {self.facility.name}, ID: {self.facility.id}")
@@ -655,7 +672,7 @@ class Location:
         if self.holdingArea is not None:
             hAN = self.holdingArea.name
             hAID = self.holdingArea.id
-            print(f"""Holding Area: {hAN}, ID: {hAID}""")
+            print(f"Holding Area: {hAN}, ID: {hAID}")
 
 
 class Command(IDClass):
@@ -664,16 +681,49 @@ class Command(IDClass):
 
     Attributes:
         type (str): Type of command.
-        targetID (int): ID of instance that is targeted by command.
+        target (HistoryClass): Instance that is targeted by command.
     """
 
-    type: str
-    targetID: int
-
-    def __init__(self, cmdType: str, targetID: int):
+    def __init__(self, type: str, target: HistoryClass):
         super().__init__()
-        self.type = cmdType
-        self.targetID = targetID
+        self.SetType(type)
+        self.SetTarget(target)
+
+    def SetType(self, type: str) -> None:
+        """
+        Sets command type.
+
+        Args:
+                type (str): Command type.
+        """
+        self.type = type
+
+    def GetType(self) -> str:
+        """
+        Gets command type.
+
+        Returns:
+                str: Command type.
+        """
+        return self.type
+
+    def SetTarget(self, target: HistoryClass) -> None:
+        """
+        Set instance targeted with a command.
+
+        Args:
+                target (HistoryClass): Targeted instance.
+        """
+        self.target = target
+
+    def GetTarget(self) -> HistoryClass:
+        """
+        Gets instance targeted with a command.
+
+        Returns:
+                HistoryClass: Targeted instance.
+        """
+        return self.target
 
 
 class TransportCmd(Command):
@@ -681,33 +731,58 @@ class TransportCmd(Command):
     A class that specifies a transport command from an origin to a destination.
 
     Attributes:
+        target (HistoryClass): Instance that is targeted by command.
         origin (Location): Origin of transport.
         destination (Location): Destination of transport.
     """
 
-    origin: Location
-    destination: Location
+    def __init__(self, target: HistoryClass, origin: Location, destination: Location):
+        super().__init__("transport", target)
+        self.SetOrigin(origin)
+        self.SetDestination(destination)
 
-    def __init__(self, origin: Location, destination: Location):
-        super().__init__()
-        self.type = "transport"
-        self.origin = origin
-        self.destination = destination
-
-    def GetOrigin(self):
+    def SetOrigin(self, origin: Location) -> None:
         """
-        Get origin of transport.
+        Sets origin of transport.
+
+        Args:
+                origin (Location): Origin of transport.
+        """
+        self.origin = origin
+
+    def GetOrigin(self) -> Location:
+        """
+        Gets origin of transport.
 
         Returns:
-                origin (Location): Origin of transport.
+                Location: Origin of transport.
         """
         return self.origin
 
-    def GetDestintaion(self):
+    def SetDestination(self, destination: Location) -> None:
         """
-        Get destination of transport.
+        Sets destination of transport.
 
-        Returns:
+        Args:
                 destination (Location): Destination of transport.
         """
+        self.destination = destination
+
+    def GetDestination(self) -> Location:
+        """
+        Gets destination of transport.
+
+        Returns:
+                Location: Destination of transport.
+        """
         return self.destination
+
+    def PrintCommand(self) -> None:
+        """
+        Prints details of transport command.
+        """
+        print(f"Transport command with target: {self.target}")
+        print("Origin:")
+        self.origin.PrintLocation()
+        print("Destination:")
+        self.destination.PrintLocation()

@@ -58,7 +58,7 @@ class MonitoringSystem:
         return cls._registry[id]
 
     @classmethod
-    def display_registry(cls):
+    def display_registry(cls) -> None:
         """
         Displays all instances in the registry.
         """

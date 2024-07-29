@@ -3,36 +3,32 @@ from model.components import Facility
 from model.components import Room
 from model.components import HoldingArea
 from model.components import Container
+from model.components import Location
+from model.components import TransportCmd
 
 from projecttypes.dimensions import Dimensions
 
 
 # Create instances
 facility_1 = Facility(
-    type="Interim storage", name="Jülich", dimensions=Dimensions(1, 1, 1)
+    type="Interim storage", name="Facility 1", dimensions=Dimensions(1, 1, 1)
 )
 
-room_1 = Room(
-    type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1)
-)
+room_1 = Room(type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1))
 
-holdingArea_1 = HoldingArea(name="Bay 1")
-holdingArea_2 = HoldingArea(name="Bay 2")
+holdingArea_1 = HoldingArea(name="HoldingArea 1")
+holdingArea_2 = HoldingArea(name="HoldingArea 2")
 
-room_2 = Room(
-    type="Storage", name="Room 2", dimensions=Dimensions(1, 1, 1)
-)
+room_2 = Room(type="Storage", name="Room 2", dimensions=Dimensions(1, 1, 1))
 holdingArea_3 = HoldingArea(name="Bay 1")
 
 facility_2 = Facility(
-    type="Geological repository", name="Onkalo", dimensions=Dimensions(1, 1, 1)
+    type="Geological repository", name="Facility 2", dimensions=Dimensions(1, 1, 1)
 )
 
-room_3 = Room(
-    type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1)
-)
+room_3 = Room(type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1))
 
-holdingArea_4 = HoldingArea(name="Bay 1")
+holdingArea_4 = HoldingArea(name="HoldingArea 1")
 
 container_1 = Container(
     type="Castor", name="Container 1", dimensions=Dimensions(1, 1, 1)
@@ -89,4 +85,24 @@ container_1.GetLocation().PrintLocation()
 print("\nComplete registry:")
 MonitoringSystem.display_registry()
 
-# Move container
+# Definine a Transport command
+target = container_1
+origin = holdingArea_1.GetLocation()
+origin.SetHoldingArea(holdingArea_1)
+destination = holdingArea_4.GetLocation()
+destination.SetHoldingArea(holdingArea_4)
+
+transport_1 = TransportCmd(target, origin, destination)
+transport_1.PrintCommand()
+
+# Move container by activating it with Transport command
+container_1.Activation(transport_1)
+
+# Print new container location and histories
+print("\nLocation - Container 1")
+container_1.GetLocation().PrintLocation()
+
+print("\nHistory - Container 1")
+container_1.ShowHistory()
+print("History - Facility 1")
+facility_1.ShowHistory()

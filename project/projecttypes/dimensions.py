@@ -11,7 +11,7 @@ class Dimensions:
         self.y: float = y
         self.z: float = z
 
-    def PrintDimensions(self):
+    def PrintDimensions(self) -> None:
         """
         Print x, y, and z dimensions.
         """
