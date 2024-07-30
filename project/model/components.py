@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Dict
+from contextlib import contextmanager
 
 from model.monitoringsystem import IDClass
 
@@ -21,10 +22,26 @@ class HistoryClass(IDClass):
         super().__init__()
         self.registry: Dict[int, dict] = {}
 
-    def Activation(self, cmd: "Command") -> None:
+    def Activation(self, cmd: "Command", caller: "Commander") -> None:
         """
-        Registers a command and activates certain functions based on
-        the command type.
+        Public activation function that ensures caller's identity before
+        before calling private activation function.
+
+        Args:
+            cmd (Command): Instance of command that is meant to be processed.
+            caller (Commander):
+                Caller that needs to be instance of Commander class.
+        """
+        if caller != Commander._authorized_commander:
+            raise PermissionError(
+                "Activation can only be called within CreateTransportCommand."
+            )
+        self._activation(cmd)
+
+    def _activation(self, cmd: "Command") -> None:
+        """
+        Registers a command passed to this instance and
+        activates certain functions based on the command type.
 
         Args:
             cmd (Command): Instance of command to be processed.
@@ -42,10 +59,10 @@ class HistoryClass(IDClass):
 
     def GetHistory(self) -> Dict[int, dict]:
         """
-        Gets history.
+        Gets history of instance.
 
         Returns:
-            Dict[int, dict]: History of an instance.
+            Dict[int, dict]: History of instance.
         """
         return self.registry
 
@@ -199,6 +216,7 @@ class Room(HistoryClass):
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
+        self.location: Location = None
         self.holdingArea_inventory: Dict[int, "HoldingArea"] = {}
 
     def SetType(self, type: str) -> None:
@@ -262,7 +280,14 @@ class Room(HistoryClass):
         Args:
             location (Location): Location of room.
         """
-        self.location = location
+        if location.GetFacility() is None:
+            raise KeyError("Facility must not be NoneType.")
+        elif location.GetRoom() is not None:
+            raise KeyError("Room must be NoneType.")
+        elif location.GetHoldingArea() is not None:
+            raise KeyError("Holding area must be NoneType.")
+        else:
+            self.location = location
 
     def GetLocation(self) -> "Location":
         """
@@ -346,6 +371,7 @@ class HoldingArea(HistoryClass):
         super().__init__()
         self.SetName(name)
         self.SetOccupationStatus(False)
+        self.location: Location = None
         self.container_inventory: Dict[int, "Container"] = {}
 
     def SetName(self, name: str) -> None:
@@ -373,7 +399,14 @@ class HoldingArea(HistoryClass):
         Args:
             location (Location): Location of holding area.
         """
-        self.location = location
+        if location.GetFacility() is None:
+            raise KeyError("Facility must not be NoneType.")
+        elif location.GetRoom() is None:
+            raise KeyError("Room must not be NoneType.")
+        elif location.GetHoldingArea() is not None:
+            raise KeyError("Holding area must be NoneType.")
+        else:
+            self.location = location
 
     def GetLocation(self) -> "Location":
         """
@@ -467,7 +500,7 @@ class Container(HistoryClass):
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
-        self.SetLocation(None)
+        self.location: Location = None
 
     def SetType(self, type: str) -> None:
         """
@@ -531,7 +564,14 @@ class Container(HistoryClass):
         Args:
             location (Location): New location of container.
         """
-        self.location = location
+        if location.GetFacility() is None:
+            raise KeyError("Facility must not be NoneType.")
+        elif location.GetRoom() is None:
+            raise KeyError("Room must not be NoneType.")
+        elif location.GetHoldingArea() is None:
+            raise KeyError("Holding area must not be NoneType.")
+        else:
+            self.location = location
 
     def GetLocation(self) -> "Location":
         """
@@ -542,42 +582,19 @@ class Container(HistoryClass):
         """
         return self.location
 
-    def Activation(self, cmd: "Command") -> None:
+    def _activation(self, cmd: "Command") -> None:
         """
-        Activates certain functions based on
-        the command type.
+        Registers a command passed to this instance and
+        activates certain functions based on the command type.
 
         Args:
             cmd (Command): Instance of command to be processed.
-
         """
-        if self.id is not cmd.target.id:
-            raise KeyError(
-                f"""Target ID {cmd.target.id}
-                does not match this instance's ID {self.id}."""
-            )
-        elif type(cmd) is TransportCmd:
-            # Activate components at origin of transport
-            current_holdingArea = self.GetLocation().GetHoldingArea()
-            current_holdingArea.Activation(cmd)
-            current_room = self.GetLocation().GetRoom()
-            current_room.Activation(cmd)
-            current_facility = self.GetLocation().GetFacility()
-            current_facility.Activation(cmd)
-
-            # Activate components at destination of transport
-            destination_facility = cmd.destination.GetFacility()
-            destination_facility.Activation(cmd)
-
-            destination_room = cmd.destination.GetRoom()
-            destination_room.Activation(cmd)
-
-            destination_holdingArea = cmd.destination.GetHoldingArea()
-            destination_holdingArea.Activation(cmd)
-
+        if type(cmd) is TransportCmd:
             # Update own location to destination
             self.SetLocation(cmd.destination)
 
+        # Update own history
         super().UpdateHistory(cmd)
 
 
@@ -678,6 +695,7 @@ class Location:
 class Command(IDClass):
     """
     The base class for all instances that specify commands.
+    All commands are to be directed to the Commander.
 
     Attributes:
         type (str): Type of command.
@@ -788,3 +806,82 @@ class TransportCmd(Command):
         self.origin.PrintLocation()
         print("Destination:")
         self.destination.PrintLocation()
+
+
+class Commander:
+    """
+    A class that creates commands based on user input.
+    """
+
+    _authorized_commander = None
+
+    def __init__(self) -> None:
+        pass
+
+    @contextmanager
+    def _authorize(self):
+        old_commander = Commander._authorized_commander
+        Commander._authorized_commander = self
+        try:
+            yield
+        finally:
+            Commander._authorized_commander = old_commander
+
+    def CreateTransportCommand(
+        self, target: Container, origin: Location, destination: Location
+    ):
+        """
+        Creates transport command instance and sends it to target container.
+
+        Args:
+            target (Container): Targeted container instance.
+            origin (Location): Origin of transport.
+            destination (Location): Destination of transport.
+        """
+        # Check that origin Location matches current position of target
+        if origin.GetFacility() is not target.GetLocation().GetFacility():
+            raise KeyError(
+                "Origin Facility must be same as target's current Facility."
+            )
+        if origin.GetRoom() is not target.GetLocation().GetRoom():
+            raise KeyError(
+                "Origin Room must be same as target's current Room."
+            )
+        if (
+            origin.GetHoldingArea()
+            is not target.GetLocation().GetHoldingArea()
+        ):
+            raise KeyError(
+                """Origin Holding area must be the same
+                as target's current Holding area."""
+            )
+        # Check that destination Location does not contain NoneTypes
+        elif not destination.GetFacility():
+            raise KeyError("Destination Facility must not be NoneType.")
+        elif not destination.GetRoom():
+            raise KeyError("Destination Room must not be NoneType.")
+        elif not destination.GetHoldingArea():
+            raise KeyError("Destination Holding area must not be NoneType.")
+        else:
+            # Create Command
+            cmd = TransportCmd(target, origin, destination)
+
+            with self._authorize():
+                # Activate components at origin of transport
+                current_holdingArea = target.GetLocation().GetHoldingArea()
+                current_holdingArea.Activation(cmd, self)
+                current_room = target.GetLocation().GetRoom()
+                current_room.Activation(cmd, self)
+                current_facility = target.GetLocation().GetFacility()
+                current_facility.Activation(cmd, self)
+
+                # Activate components at destination of transport
+                destination_facility = destination.GetFacility()
+                destination_facility.Activation(cmd, self)
+                destination_room = destination.GetRoom()
+                destination_room.Activation(cmd, self)
+                destination_holdingArea = destination.GetHoldingArea()
+                destination_holdingArea.Activation(cmd, self)
+
+                # Activate target
+                target.Activation(cmd, self)
