@@ -1,34 +1,50 @@
-from model.components import Facility
-from model.components import Room
-from model.components import HoldingArea
-from model.components import Container
+# from model.monitoringsystem import MonitoringSystem
+from model.components import Facility, Room, HoldingArea, Container
 from model.components import Commander
 
-from projecttypes.dimensions import Dimensions
-
+from projecttypes.units import Dimensions, Position
 
 # Create instances
 facility_1 = Facility(
-    type="Interim storage", name="Facility 1", dimensions=Dimensions(1, 1, 1)
+    type="Interim storage",
+    name="Facility 1",
+    dimensions=Dimensions(1, 1, 1),
+    position=Position(0, 0, 0),
 )
 
-room_1 = Room(type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1))
+room_1 = Room(
+    type="Storage",
+    name="Room 1",
+    dimensions=Dimensions(1, 1, 1),
+    position=Position(0, 0, 0),
+)
 
-holdingArea_1 = HoldingArea(name="HoldingArea 1")
-holdingArea_2 = HoldingArea(name="HoldingArea 2")
+holdingArea_1 = HoldingArea(name="HoldingArea 1", position=Position(0, 0, 0))
+holdingArea_2 = HoldingArea(name="HoldingArea 2", position=Position(0, 0, 0))
 
-room_2 = Room(type="Storage", name="Room 2", dimensions=Dimensions(1, 1, 1))
-holdingArea_3 = HoldingArea(name="Bay 1")
+room_2 = Room(
+    type="Storage",
+    name="Room 2",
+    dimensions=Dimensions(1, 1, 1),
+    position=Position(0, 0, 0),
+)
+holdingArea_3 = HoldingArea(name="Bay 1", position=Position(0, 0, 0))
 
 facility_2 = Facility(
     type="Geological repository",
     name="Facility 2",
     dimensions=Dimensions(1, 1, 1),
+    position=Position(0, 0, 0),
 )
 
-room_3 = Room(type="Storage", name="Room 1", dimensions=Dimensions(1, 1, 1))
+room_3 = Room(
+    type="Storage",
+    name="Room 1",
+    dimensions=Dimensions(1, 1, 1),
+    position=Position(0, 0, 0),
+)
 
-holdingArea_4 = HoldingArea(name="HoldingArea 1")
+holdingArea_4 = HoldingArea(name="HoldingArea 1", position=Position(0, 0, 0))
 
 container_1 = Container(
     type="Castor", name="Container 1", dimensions=Dimensions(1, 1, 1)
@@ -92,7 +108,7 @@ destination = holdingArea_4.GetLocation()
 destination.SetHoldingArea(holdingArea_4)
 
 commander = Commander()
-commander.CreateTransportCommand(target, origin, destination)
+commander.IssueTransportCommand(target, origin, destination)
 
 # Print new container location and histories
 print("\nLocation - Container 1")

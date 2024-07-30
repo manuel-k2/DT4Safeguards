@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from typing import Dict
 from contextlib import contextmanager
 
-from model.monitoringsystem import IDClass
+from model.monitoringsystem import MonitoringSystem, IDClass
 
-from projecttypes.dimensions import Dimensions
+from projecttypes.units import Dimensions, Position
 
 
 @dataclass
@@ -89,11 +89,14 @@ class Facility(HistoryClass):
             contained in facility.
     """
 
-    def __init__(self, type: str, name: str, dimensions: Dimensions):
+    def __init__(
+        self, type: str, name: str, dimensions: Dimensions, position: Position
+    ):
         super().__init__()
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
+        self.SetPosition(position)
         self.room_inventory: Dict[int, "Room"] = {}
 
     def SetType(self, type: str) -> None:
@@ -103,7 +106,7 @@ class Facility(HistoryClass):
         Args:
             type (str): Facility type.
         """
-        self.type = type
+        self.type: str = type
 
     def GetType(self) -> str:
         """
@@ -121,7 +124,7 @@ class Facility(HistoryClass):
         Args:
             name (str): Facility name.
         """
-        self.name = name
+        self.name: str = name
 
     def GetName(self) -> str:
         """
@@ -140,7 +143,7 @@ class Facility(HistoryClass):
             dimensions (Dimensions):
                 Dimensions assigned to the facility instance.
         """
-        self.dimensions = dimensions
+        self.dimensions: Dimensions = dimensions
 
     def GetDimensions(self) -> Dimensions:
         """
@@ -150,6 +153,25 @@ class Facility(HistoryClass):
             Dimensions: Dimensions assigned to the facility instance.
         """
         return self.dimensions
+
+    def SetPosition(self, position: Position) -> None:
+        """
+        Sets cartesian position of facility instance.
+
+        Args:
+            position (Position):
+                Position assigned to facility instance.
+        """
+        self.position: Position = position
+
+    def GetPosition(self) -> Position:
+        """
+        Gets position of facility instance.
+
+        Returns:
+            Position: Position assigned to facility instance.
+        """
+        return self.position
 
     def AddRoom(self, room: "Room") -> None:
         """
@@ -211,12 +233,15 @@ class Room(HistoryClass):
             holding areas that are contained in room.
     """
 
-    def __init__(self, type: str, name: str, dimensions: Dimensions):
+    def __init__(
+        self, type: str, name: str, dimensions: Dimensions, position: Position
+    ):
         super().__init__()
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
         self.location: Location = None
+        self.SetPosition(position)
         self.holdingArea_inventory: Dict[int, "HoldingArea"] = {}
 
     def SetType(self, type: str) -> None:
@@ -226,7 +251,7 @@ class Room(HistoryClass):
         Args:
             type (str): Room type.
         """
-        self.type = type
+        self.type: str = type
 
     def GetType(self) -> str:
         """
@@ -244,7 +269,7 @@ class Room(HistoryClass):
         Args:
             name (str): Room name.
         """
-        self.name = name
+        self.name: str = name
 
     def GetName(self) -> str:
         """
@@ -262,7 +287,7 @@ class Room(HistoryClass):
         Args:
             dimensions (Dimensions): Dimensions assigned to the room instance.
         """
-        self.dimensions = dimensions
+        self.dimensions: Dimensions = dimensions
 
     def GetDimensions(self) -> Dimensions:
         """
@@ -275,7 +300,8 @@ class Room(HistoryClass):
 
     def SetLocation(self, location: "Location") -> None:
         """
-        Sets room location. Called when added to a facility.
+        Sets room location room.
+        Called when added to a facility.
 
         Args:
             location (Location): Location of room.
@@ -287,16 +313,35 @@ class Room(HistoryClass):
         elif location.GetHoldingArea() is not None:
             raise KeyError("Holding area must be NoneType.")
         else:
-            self.location = location
+            self.location: Location = location
 
     def GetLocation(self) -> "Location":
         """
-        Gets location of room.
+        Gets location of room instance.
 
         Return:
             location (Location): Location of room.
         """
         return self.location
+
+    def SetPosition(self, position: Position) -> None:
+        """
+        Sets cartesian position of room instance.
+
+        Args:
+            position (Position):
+                Position assigned to room instance.
+        """
+        self.position: Position = position
+
+    def GetPosition(self) -> Position:
+        """
+        Gets position of room instance.
+
+        Returns:
+            Position: Position assigned to room instance.
+        """
+        return self.position
 
     def AddHoldingArea(self, holdingArea: "HoldingArea") -> None:
         """
@@ -367,11 +412,12 @@ class HoldingArea(HistoryClass):
             Dictionary of container in holding area.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, position: Position):
         super().__init__()
         self.SetName(name)
         self.SetOccupationStatus(False)
         self.location: Location = None
+        self.SetPosition(position)
         self.container_inventory: Dict[int, "Container"] = {}
 
     def SetName(self, name: str) -> None:
@@ -381,7 +427,7 @@ class HoldingArea(HistoryClass):
         Args:
             name (str): Holding area name.
         """
-        self.name = name
+        self.name: str = name
 
     def GetName(self) -> str:
         """
@@ -406,7 +452,7 @@ class HoldingArea(HistoryClass):
         elif location.GetHoldingArea() is not None:
             raise KeyError("Holding area must be NoneType.")
         else:
-            self.location = location
+            self.location: Location = location
 
     def GetLocation(self) -> "Location":
         """
@@ -416,6 +462,25 @@ class HoldingArea(HistoryClass):
             location (Location): Location of holding area.
         """
         return self.location
+
+    def SetPosition(self, position: Position) -> None:
+        """
+        Sets cartesian position of holding area instance.
+
+        Args:
+            position (Position):
+                Position assigned to holding area instance.
+        """
+        self.position: Position = position
+
+    def GetPosition(self) -> Position:
+        """
+        Gets position of holding area instance.
+
+        Returns:
+            Position: Position assigned to holding area instance.
+        """
+        return self.position
 
     def SetOccupationStatus(self, occupationStatus: bool) -> None:
         """
@@ -509,7 +574,7 @@ class Container(HistoryClass):
         Args:
             type (str): Container type.
         """
-        self.type = type
+        self.type: str = type
 
     def GetType(self) -> str:
         """
@@ -527,7 +592,7 @@ class Container(HistoryClass):
         Args:
             name (str): Container name.
         """
-        self.name = name
+        self.name: str = name
 
     def GetName(self) -> str:
         """
@@ -546,7 +611,7 @@ class Container(HistoryClass):
             dimensions (Dimensions):
                 Dimensions assigned to the container instance.
         """
-        self.dimensions = dimensions
+        self.dimensions: Dimensions = dimensions
 
     def GetDimensions(self) -> Dimensions:
         """
@@ -571,7 +636,7 @@ class Container(HistoryClass):
         elif location.GetHoldingArea() is None:
             raise KeyError("Holding area must not be NoneType.")
         else:
-            self.location = location
+            self.location: Location = location
 
     def GetLocation(self) -> "Location":
         """
@@ -602,7 +667,6 @@ class Location:
     """
     A class that specifies the location of an instance
     based on facility, room and holding area.
-    Needs at least a facility for initialization.
 
     Attributes:
         facility (Facility): Corresponding   facility instance.
@@ -631,7 +695,7 @@ class Location:
         Args:
                 facility (Facility): Facility instance.
         """
-        self.facility = facility
+        self.facility: Facility = facility
 
     def GetFacility(self) -> Facility:
         """
@@ -649,7 +713,7 @@ class Location:
         Args:
                 room (Room): Room instance.
         """
-        self.room = room
+        self.room: Room = room
 
     def GetRoom(self) -> Room:
         """
@@ -660,14 +724,14 @@ class Location:
         """
         return self.room
 
-    def SetHoldingArea(self, holdingArea: HoldingArea):
+    def SetHoldingArea(self, holdingArea: HoldingArea) -> None:
         """
         Sets holding area.
 
         Args:
                 holdingArea (HoldingArea): Holding area instance.
         """
-        self.holdingArea = holdingArea
+        self.holdingArea: HoldingArea = holdingArea
 
     def GetHoldingArea(self) -> HoldingArea:
         """
@@ -714,7 +778,7 @@ class Command(IDClass):
         Args:
                 type (str): Command type.
         """
-        self.type = type
+        self.type: str = type
 
     def GetType(self) -> str:
         """
@@ -732,7 +796,7 @@ class Command(IDClass):
         Args:
                 target (HistoryClass): Targeted instance.
         """
-        self.target = target
+        self.target: HistoryClass = target
 
     def GetTarget(self) -> HistoryClass:
         """
@@ -768,7 +832,7 @@ class TransportCmd(Command):
         Args:
                 origin (Location): Origin of transport.
         """
-        self.origin = origin
+        self.origin: Location = origin
 
     def GetOrigin(self) -> Location:
         """
@@ -786,7 +850,7 @@ class TransportCmd(Command):
         Args:
                 destination (Location): Destination of transport.
         """
-        self.destination = destination
+        self.destination: Location = destination
 
     def GetDestination(self) -> Location:
         """
@@ -815,9 +879,6 @@ class Commander:
 
     _authorized_commander = None
 
-    def __init__(self) -> None:
-        pass
-
     @contextmanager
     def _authorize(self):
         old_commander = Commander._authorized_commander
@@ -827,9 +888,9 @@ class Commander:
         finally:
             Commander._authorized_commander = old_commander
 
-    def CreateTransportCommand(
+    def IssueTransportCommand(
         self, target: Container, origin: Location, destination: Location
-    ):
+    ) -> None:
         """
         Creates transport command instance and sends it to target container.
 
@@ -885,3 +946,217 @@ class Commander:
 
                 # Activate target
                 target.Activation(cmd, self)
+
+
+class Builder:
+    """
+    A class that creates instances of physical components and
+    uses them to construct a model based on user input.
+    """
+
+    def BuildModel(self, model: Dict[str, Dict]) -> None:
+        """
+        Builds a model based on a dictionary-based
+        input and an adjacency matrix.
+
+        Args:
+            model (Dict[str, Dict]):
+                Dictionary containing names and structure of
+                facilities, rooms and holding areas.
+            adjacency ():
+                Matrix specifying adjacency for rooms
+                through entries and exits.
+        """
+
+        # Initialize facility with data from dictionary
+        #       Model MUST contain at least one facility.
+        if not model:
+            raise KeyError("Model must contain at least one facility.")
+
+        for _facility, stats in model.items():
+            facilityInstance = Facility(
+                type=stats["type"],
+                name=stats["name"],
+                dimensions=Dimensions(
+                    stats["dimensions"]["dx"],
+                    stats["dimensions"]["dy"],
+                    stats["dimensions"]["dx"],
+                ),
+                position=Position(
+                    stats["position"]["x"],
+                    stats["position"]["y"],
+                    stats["position"]["z"],
+                ),
+            )
+
+            # Initialize room with data from dictionary
+            #       Facility MUST contain at least one room.
+            if not stats["rooms"]:
+                raise KeyError("Facility must contain at least one room.")
+
+            model_2: Dict[str, Dict] = stats["rooms"]
+            for _room, stats_2 in model_2.items():
+                roomInstance = Room(
+                    type=stats_2["type"],
+                    name=stats_2["name"],
+                    dimensions=Dimensions(
+                        stats_2["dimensions"]["dx"],
+                        stats_2["dimensions"]["dy"],
+                        stats_2["dimensions"]["dx"],
+                    ),
+                    position=Position(
+                        stats_2["position"]["x"],
+                        stats_2["position"]["y"],
+                        stats_2["position"]["z"],
+                    ),
+                )
+
+                # Add room to facility
+                facilityInstance.AddRoom(roomInstance)
+
+                if len(stats_2) > 4:
+                    # Initialize holding area with data from dictionary
+                    #       Room MAY contain holding areas.
+                    model_3: Dict[str, Dict] = stats_2["holdingAreas"]
+                    for _holdingArea, stats_3 in model_3.items():
+                        holdingAreaInstance = HoldingArea(
+                            name=stats_3["name"],
+                            position=Position(
+                                stats_3["position"]["x"],
+                                stats_3["position"]["y"],
+                                stats_3["position"]["z"],
+                            ),
+                        )
+
+                        # Add holding area to room
+                        roomInstance.AddHoldingArea(holdingAreaInstance)
+
+                        # Initialize container with data from dictionary
+                        #       Holding area MAY contain a container.
+                        if len(stats_3) > 2:
+                            model_4: Dict = stats_3["container"]
+                            containerInstance = Container(
+                                type=model_4["type"],
+                                name=model_4["name"],
+                                dimensions=Dimensions(
+                                    model_4["dimensions"]["dx"],
+                                    model_4["dimensions"]["dy"],
+                                    model_4["dimensions"]["dx"],
+                                ),
+                            )
+
+                            # Add container to holding area
+                            holdingAreaInstance.AddContainer(containerInstance)
+
+        print("\nComplete registry:")
+        MonitoringSystem.display_registry()
+
+    def CreateDummyModel(self) -> Dict[str, Dict]:
+        """
+        Creates a dictionary with dummy model data.
+
+        Returns:
+            Dict[str, Dict]: Dictionary with dummy model data.
+        """
+        dummy_model = {
+            "facility 1": {
+                "type": "Interim storage",
+                "name": "Facility 1",
+                "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                "rooms": {
+                    "room 1": {
+                        "type": "Storage",
+                        "name": "Room 1",
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                        "holdingAreas": {
+                            "holdingArea 1": {
+                                "name": "HoldingArea 1",
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                                "container": {
+                                    "type": "Castor",
+                                    "name": "Container 1",
+                                    "dimensions": {
+                                        "dx": 1.0,
+                                        "dy": 1.0,
+                                        "dz": 1.0,
+                                    },
+                                },
+                            },
+                            "holdingArea 2": {
+                                "name": "HoldingArea 2",
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                            },
+                        },
+                    },
+                    "room 2": {
+                        "type": "Storage",
+                        "name": "Room 1",
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                        "holdingAreas": {
+                            "holdingArea 1": {
+                                "name": "HoldingArea 1",
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                            }
+                        },
+                    },
+                },
+            },
+            "facility 2": {
+                "type": "Geological repository",
+                "name": "Facility 2",
+                "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                "rooms": {
+                    "room 1": {
+                        "type": "Shaft",
+                        "name": "Room 1",
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                    },
+                    "room 2": {
+                        "type": "Drift",
+                        "name": "Room 2",
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                        "holdingAreas": {
+                            "holdingArea 1": {
+                                "name": "HoldingArea 1",
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                            }
+                        },
+                    },
+                },
+            },
+        }
+        return dummy_model
+    
+    def CreateModelManually(self) -> Dict[str, Dict]:
+        """
+        Creates a model manually based on user prompts.
+
+        Returns:
+            Dict[str, Dict]: Dictionary with model data.
+        """
+        pass
+    
+    def CreateModelFromFile(self, path: str) -> Dict[str, Dict]:
+        """
+        Creates a model based on a json file.
+        See dummy model for syntax. 
+
+        Args:
+            parth (str): Absolute path to file with model data.
+
+        Returns:
+            Dict[str, Dict]: Dictionary with model data.
+        """
+        pass
+
+    def CreateDummyAdjacencyMatrix(self):
+        """
+        Creates dummy adjaceny matrix for dummy model data.
+        """
+        pass
