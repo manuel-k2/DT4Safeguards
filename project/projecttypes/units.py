@@ -26,8 +26,8 @@ class Dimensions:
         Args:
             dx (float): Length in x direction.
         """
-        self.dx : float = dx
-    
+        self.dx: float = dx
+
     def GetX(self) -> float:
         """
         Gets length in x direction.
@@ -44,8 +44,8 @@ class Dimensions:
         Args:
             dy (float): Length in y direction.
         """
-        self.dy : float = dy
-    
+        self.dy: float = dy
+
     def GetY(self) -> float:
         """
         Gets length in z direction.
@@ -62,8 +62,8 @@ class Dimensions:
         Args:
             dz (float): Length in z direction.
         """
-        self.dz : float = dz
-    
+        self.dz: float = dz
+
     def GetZ(self) -> float:
         """
         Gets length in z direction..
@@ -72,6 +72,7 @@ class Dimensions:
             float: Length in z direction.
         """
         return self.dz
+
 
 class Position:
     """

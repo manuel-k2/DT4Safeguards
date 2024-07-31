@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Dict
 from contextlib import contextmanager
 
@@ -7,7 +6,6 @@ from model.monitoringsystem import MonitoringSystem, IDClass
 from projecttypes.units import Dimensions, Position
 
 
-@dataclass
 class HistoryClass(IDClass):
     """
     The base class for all instances that come with a history that
@@ -1132,7 +1130,7 @@ class Builder:
             },
         }
         return dummy_model
-    
+
     def CreateModelManually(self) -> Dict[str, Dict]:
         """
         Creates a model manually based on user prompts.
@@ -1141,14 +1139,14 @@ class Builder:
             Dict[str, Dict]: Dictionary with model data.
         """
         pass
-    
+
     def CreateModelFromFile(self, path: str) -> Dict[str, Dict]:
         """
         Creates a model based on a json file.
-        See dummy model for syntax. 
+        See dummy model for syntax.
 
         Args:
-            parth (str): Absolute path to file with model data.
+            path (str): Absolute path to file with model data.
 
         Returns:
             Dict[str, Dict]: Dictionary with model data.
