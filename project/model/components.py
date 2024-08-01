@@ -24,6 +24,17 @@ class MonitoringSystem:
 
     _registry: ClassVar[Dict[int, "IDClass"]] = {}
     _id_counter: ClassVar[int] = 0
+    verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
+
+    @classmethod
+    def set_verbosity(cls, level: int) -> None:
+        """
+        Sets the verbosity level.
+
+        Args:
+            level (int): Verbosity level (0: Silent, 1: Verbose).
+        """
+        cls.verbosity = level
 
     @classmethod
     def register(cls, instance: "IDClass") -> int:
@@ -57,10 +68,13 @@ class MonitoringSystem:
                 given ID is not found.
         """
         if id not in cls._registry:
-            print(f"Instance with ID '{id}' not found.")
+            if cls.verbosity > 0:
+                print(f"Instance with ID '{id}' not found.")
             raise InstanceNotFoundError()
-        return cls._registry[id]
-    
+        instance = cls._registry[id]
+        if cls.verbosity > 0:
+            print(f"Retrieved instance with ID {id}: {instance}")
+        return instance
     @classmethod
     def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDClass"]:
         """
@@ -83,6 +97,11 @@ class MonitoringSystem:
         if not instance_inventory:
             print(f"No instances of type '{class_type}' found.")
             raise InstanceNotFoundError()
+        
+        if cls.verbosity > 0:
+            print(f"Instances of type {class_type.__name__}:")
+            for id, instance in instance_inventory.items():
+                print(f"ID: {id}, Instance: {instance}")
         
         return instance_inventory
 
@@ -109,6 +128,17 @@ class IDClass:
     """
 
     id: int = field(init=False)
+    verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
+
+    @classmethod
+    def set_verbosity(cls, level: int) -> None:
+        """
+        Sets the verbosity level.
+
+        Args:
+            level (int): Verbosity level (0: Silent, 1: Verbose).
+        """
+        cls.verbosity = level
 
     def __post_init__(self):
         """
@@ -320,11 +350,12 @@ class Facility(HistoryClass):
             Dict[int, Room]: Dictionary of rooms that are contained
                 in facility.
         """
-        if not self.room_inventory:
-            print("Inventory is empty.")
-        else:
-            for id, room in self.room_inventory.items():
-                print(f"ID: {id}, Room: {room.name}")
+        if IDClass.verbosity > 0:
+            if not self.room_inventory:
+                print("Inventory is empty.")
+            else:
+                for id, room in self.room_inventory.items():
+                    print(f"ID: {id}, Room: {room.name}")
         return self.room_inventory
 
     def PresentEntryInventory(self):
@@ -495,11 +526,12 @@ class Room(HistoryClass):
             Dict[int, HoldingArea]:
                 Dictionary of holding areas that are contained in room.
         """
-        if not self.holdingArea_inventory:
-            print("Inventory is empty.")
-        else:
-            for id, holdingArea in self.holdingArea_inventory.items():
-                print(f"Holding area: {holdingArea.name}, ID: {id}")
+        if IDClass.verbosity > 0:
+            if not self.holdingArea_inventory:
+                print("Inventory is empty.")
+            else:
+                for id, holdingArea in self.holdingArea_inventory.items():
+                    print(f"Holding area: {holdingArea.name}, ID: {id}")
         return self.holdingArea_inventory
 
     def CheckForEquipment(self):
@@ -619,7 +651,8 @@ class HoldingArea(HistoryClass):
             container (Container): Container to be added to holding area.
         """
         if self.occupationStatus is True:
-            print("Holding Area is already occupied.")
+            if IDClass.verbosity > 0:
+                print("Holding Area is already occupied.")
         else:
             # Set new location to added container
             container_location = Location(
@@ -635,10 +668,11 @@ class HoldingArea(HistoryClass):
         """
         Removes container from holding area.
         """
-        for id, container in self.container_inventory.items():
-            print(
-                f"ID: {id}, Container: {container} removed from holding area."
-            )
+        if IDClass.verbosity > 0:
+            for id, container in self.container_inventory.items():
+                print(
+                    f"ID: {id}, Container: {container} removed from holding area."
+                )
         self.container_inventory.clear()
         self.occupationStatus = False
 
@@ -651,11 +685,12 @@ class HoldingArea(HistoryClass):
                 Container that is contained in holding area.
         """
         if self.occupationStatus is False:
-            print("No container in holding area.")
-            pass
+            if IDClass.verbosity > 0:
+                print("No container in holding area.")
         else:
             for id, container in self.container_inventory.items():
-                print(f"Container: {container.name}, ID: {id}")
+                if IDClass.verbosity > 0:
+                    print(f"Container: {container.name}, ID: {id}")
                 return container
 
 
@@ -1159,8 +1194,9 @@ class Builder:
                             # Add container to holding area
                             holdingAreaInstance.AddContainer(containerInstance)
 
-        print("\nAll registered instances:")
-        MonitoringSystem.display_registry()
+        if MonitoringSystem.verbosity > 0:
+            print("\nAll registered instances:")
+            MonitoringSystem.display_registry()
 
     def GetModel(self) -> Dict[str, Dict]:
         """
@@ -1369,10 +1405,12 @@ class Builder:
                 data = json.load(file)
             return data
         except FileNotFoundError:
-            print(f"Error: The file '{filePath}' was not found.")
+            if MonitoringSystem.verbosity > 0:
+                print(f"Error: The file '{filePath}' was not found.")
             return None
         except json.JSONDecodeError:
-            print(f"Error: The file '{filePath}' is not a valid JSON.")
+            if MonitoringSystem.verbosity > 0:
+                print(f"Error: The file '{filePath}' is not a valid JSON.")
             return None
     
     def ExportModelToFile(self, model: Dict[str, Dict]) -> None:
