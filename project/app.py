@@ -12,8 +12,8 @@ builder.BuildModel(model)
 container_1: Container = MonitoringSystem.get_instance(id=3)
 holdingArea_destination: HoldingArea = MonitoringSystem.get_instance(id=10)
 
-#print("\nLocation - Container 1 (PreTransport): ")
-#container_1.GetLocation().PrintLocation()
+# print("\nLocation - Container 1 (PreTransport): ")
+# container_1.GetLocation().PrintLocation()
 
 # Move container by sending Transport sepecifications to Commander
 target = container_1
@@ -25,18 +25,18 @@ commander = Commander()
 commander.IssueTransportCommand(target, origin, destination)
 
 # Print new container location and histories
-#print("\nLocation - Container 1 (PostTransport)")
-#container_1.GetLocation().PrintLocation()
-#print("\nHistory - Container 1")
-#container_1.ShowHistory()
+# print("\nLocation - Container 1 (PostTransport)")
+# container_1.GetLocation().PrintLocation()
+# print("\nHistory - Container 1")
+# container_1.ShowHistory()
 
-#facility_1: Facility = MonitoringSystem.get_instance(id=0)
-#print("History - Facility 1")
-#facility_1.ShowHistory()
+# facility_1: Facility = MonitoringSystem.get_instance(id=0)
+# print("History - Facility 1")
+# facility_1.ShowHistory()
 
-#facility_2: Facility = MonitoringSystem.get_instance(id=7)
-#print("History - Facility 2")
-#facility_2.ShowHistory()
+# facility_2: Facility = MonitoringSystem.get_instance(id=7)
+# print("History - Facility 2")
+# facility_2.ShowHistory()
 
 # Display current state of model and export it to JSON file
 model_update = builder.GetModel()

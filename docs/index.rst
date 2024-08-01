@@ -50,3 +50,20 @@ Modules
 
 .. automodule:: project.projecttypes.dimensions
     :members:
+
+Impressum
+---------
+
+| Verantwortliche nach § 18, Abs. 2, Medienstaatsvertrag (MStV):
+|
+| Manuel Kreutle
+|
+| Institute of Fusion Energy and Nuclear Waste Management (IFN)
+| IFN-2: Nuclear Waste Management
+| Nuclear Safeguards and Security
+|
+| Forschungszentrum Jülich
+| Wilhelm-Johnen-Straße, 52428 Jülich
+|
+| Phone:  +49 2461 61-5829
+| Email:  m.kreutle@fz-juelich.de

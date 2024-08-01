@@ -23,6 +23,7 @@ class MonitoringSystem:
         _registry (Dict[int, IDClass]): Class-level dictionary to store
         instances of IDClass, indexed by integer IDs.
         _id_counter (int): Class-level counter to generate unique IDs.
+        verbosity (int): Class-level verbosity setting.
     """
 
     _registry: ClassVar[Dict[int, "IDClass"]] = {}
@@ -130,6 +131,7 @@ class IDClass:
 
     Attributes:
         id (int): The unique identifier for the instance.
+        verbosity (int): Class-level verbosity setting.
     """
 
     id: int = field(init=False)
@@ -1119,6 +1121,7 @@ class Commander:
                 target.Activation(cmd, self)
 
 
+@dataclass
 class Builder:
     """
     A class that creates instances of physical components and
