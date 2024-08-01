@@ -1,0 +1,131 @@
+{
+    "facility 1": {
+        "type": "Interim storage",
+        "name": "Facility 1",
+        "dimensions": {
+            "dx": 1.0,
+            "dy": 1.0,
+            "dz": 1.0
+        },
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "rooms": {
+            "room 1": {
+                "type": "Storage",
+                "name": "Room 1",
+                "dimensions": {
+                    "dx": 1.0,
+                    "dy": 1.0,
+                    "dz": 1.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "holdingAreas": {
+                    "holdingArea 1": {
+                        "name": "HoldingArea 1",
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    },
+                    "holdingArea 2": {
+                        "name": "HoldingArea 2",
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
+                }
+            },
+            "room 2": {
+                "type": "Storage",
+                "name": "Room 1",
+                "dimensions": {
+                    "dx": 1.0,
+                    "dy": 1.0,
+                    "dz": 1.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "holdingAreas": {
+                    "holdingArea 1": {
+                        "name": "HoldingArea 1",
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "facility 2": {
+        "type": "Geological repository",
+        "name": "Facility 2",
+        "dimensions": {
+            "dx": 1.0,
+            "dy": 1.0,
+            "dz": 1.0
+        },
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "rooms": {
+            "room 1": {
+                "type": "Shaft",
+                "name": "Room 1",
+                "dimensions": {
+                    "dx": 1.0,
+                    "dy": 1.0,
+                    "dz": 1.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                }
+            },
+            "room 2": {
+                "type": "Drift",
+                "name": "Room 2",
+                "dimensions": {
+                    "dx": 1.0,
+                    "dy": 1.0,
+                    "dz": 1.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "holdingAreas": {
+                    "holdingArea 1": {
+                        "container": {
+                            "type": "Castor",
+                            "name": "Container 1",
+                            "dimensions": {
+                                "dx": 1.0,
+                                "dy": 1.0,
+                                "dz": 1.0
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

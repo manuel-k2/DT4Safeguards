@@ -1,14 +1,16 @@
 from dataclasses import dataclass, field
-from typing import ClassVar, Dict, List
+from typing import ClassVar, Dict
 from contextlib import contextmanager
-from copy import copy
 import json
 
 from projecttypes.units import Dimensions, Position
 
 
 class InstanceNotFoundError(Exception):
-    """Exception raised when an instance with a given ID or given class name is not found."""
+    """
+    Exception raised when an instance with a
+    given ID or given class name is not found.
+    """
 
     pass
 
@@ -25,7 +27,7 @@ class MonitoringSystem:
 
     _registry: ClassVar[Dict[int, "IDClass"]] = {}
     _id_counter: ClassVar[int] = 0
-    verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
+    verbosity: ClassVar[int] = 0  # 0: Silent, 1: Verbose
 
     @classmethod
     def set_verbosity(cls, level: int) -> None:
@@ -76,6 +78,7 @@ class MonitoringSystem:
         if cls.verbosity > 0:
             print(f"Retrieved instance with ID {id}: {instance}")
         return instance
+
     @classmethod
     def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDClass"]:
         """
@@ -91,19 +94,20 @@ class MonitoringSystem:
                 Dictionary of all registered instances matching class type.
         """
         instance_inventory = {
-            id: instance for id, instance in cls._registry.items()
+            id: instance
+            for id, instance in cls._registry.items()
             if isinstance(instance, class_type)
         }
 
         if not instance_inventory:
             print(f"No instances of type '{class_type}' found.")
             raise InstanceNotFoundError()
-        
+
         if cls.verbosity > 0:
             print(f"Instances of type {class_type.__name__}:")
             for id, instance in instance_inventory.items():
                 print(f"ID: {id}, Instance: {instance}")
-        
+
         return instance_inventory
 
     @classmethod
@@ -129,7 +133,7 @@ class IDClass:
     """
 
     id: int = field(init=False)
-    verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
+    verbosity: ClassVar[int] = 0  # 0: Silent, 1: Verbose
 
     @classmethod
     def set_verbosity(cls, level: int) -> None:
@@ -672,7 +676,8 @@ class HoldingArea(HistoryClass):
         if IDClass.verbosity > 0:
             for id, container in self.container_inventory.items():
                 print(
-                    f"ID: {id}, Container: {container} removed from holding area."
+                    f"""ID: {id}, Container: {container}
+                    removed from holding area."""
                 )
         self.container_inventory.clear()
         self.occupationStatus = False
@@ -693,7 +698,7 @@ class HoldingArea(HistoryClass):
                 if IDClass.verbosity > 0:
                     print(f"Container: {container.name}, ID: {id}")
                 return container
-    
+
     def _activation(self, cmd: "Command") -> None:
         """
         Registers a command passed to this instance and
@@ -704,12 +709,10 @@ class HoldingArea(HistoryClass):
         """
         if type(cmd) is TransportCmd:
             # If holding area is at origin of transport
-            origin_truncated = copy(cmd.origin).SetHoldingArea(None)
-            if self.location is origin_truncated:
+            if self is cmd.origin.GetHoldingArea():
                 self.RemoveContainer()
             # If holding area is at destination of transport
-            destination_truncated = copy(cmd.destination).SetHoldingArea(None)
-            if self.location is destination_truncated:
+            if self is cmd.destination.GetHoldingArea():
                 self.AddContainer(cmd.target)
 
         # Update own history
@@ -1233,34 +1236,91 @@ class Builder:
                 Matrix specifying adjacency for rooms
                 through entries and exits.
         """
-        model : Dict[str, Dict] = {}
+        model: Dict[str, Dict] = {}
 
-        # Get facilities from registry
-        faciliy_inventory: Dict[int, Facility] = MonitoringSystem.get_instace_by_type(Facility)
-
+        # Get facilities from registry and write stats into dictionary
+        faciliy_inventory: Dict[
+            int, Facility
+        ] = MonitoringSystem.get_instace_by_type(Facility)
         i: int = 1
         for _id, facility in faciliy_inventory.items():
-            # Write stats into dictionary
-            model["facility "+str(i)] = {
+            model["facility " + str(i)] = {
                 "type": facility.type,
                 "name": facility.name,
-                "dimensions":  {
+                "dimensions": {
                     "dx": facility.GetDimensions().GetX(),
                     "dy": facility.GetDimensions().GetY(),
-                    "dz": facility.GetDimensions().GetZ()
+                    "dz": facility.GetDimensions().GetZ(),
                 },
                 "position": {
                     "x": facility.GetPosition().GetX(),
                     "y": facility.GetPosition().GetY(),
-                    "z": facility.GetPosition().GetZ()
-                }
+                    "z": facility.GetPosition().GetZ(),
+                },
             }
 
             # Get Rooms
-            room_inventory = facility.GetRoomInventory()
+            room_inventory: Dict[int, Room] = facility.GetRoomInventory()
+            model["facility " + str(i)]["rooms"] = {}
+            j: int = 1
             for _id, room in room_inventory.items():
-                pass
-            i+=1
+                model["facility " + str(i)]["rooms"]["room " + str(j)] = {
+                    "type": room.type,
+                    "name": room.name,
+                    "dimensions": {
+                        "dx": room.GetDimensions().GetX(),
+                        "dy": room.GetDimensions().GetY(),
+                        "dz": room.GetDimensions().GetZ(),
+                    },
+                    "position": {
+                        "x": room.GetPosition().GetX(),
+                        "y": room.GetPosition().GetY(),
+                        "z": room.GetPosition().GetZ(),
+                    },
+                }
+
+                # Get Holding areas (if any)
+                holdingArea_inventory: Dict[
+                    int, HoldingArea
+                ] = room.GetHoldingAreaInventory()
+                if holdingArea_inventory:
+                    model["facility " + str(i)]["rooms"]["room " + str(j)][
+                        "holdingAreas"
+                    ] = {}
+                    k: int = 1
+                    for _id, holdingArea in holdingArea_inventory.items():
+                        model["facility " + str(i)]["rooms"]["room " + str(j)][
+                            "holdingAreas"
+                        ]["holdingArea " + str(k)] = {
+                            "name": holdingArea.name,
+                            "position": {
+                                "x": holdingArea.GetPosition().GetX(),
+                                "y": holdingArea.GetPosition().GetY(),
+                                "z": holdingArea.GetPosition().GetZ(),
+                            },
+                        }
+
+                        # Get Container (if any)
+                        container: Container = holdingArea.GetContainer()
+                        if container:
+                            model["facility " + str(i)]["rooms"][
+                                "room " + str(j)
+                            ]["holdingAreas"]["holdingArea " + str(k)] = {
+                                "container": {
+                                    "type": container.type,
+                                    "name": container.name,
+                                    "dimensions": {
+                                        "dx": container.GetDimensions().GetX(),
+                                        "dy": container.GetDimensions().GetY(),
+                                        "dz": container.GetDimensions().GetZ(),
+                                    },
+                                }
+                            }
+                        k += 1
+                    k = 1
+                j += 1
+            j = 1
+            i += 1
         return model
 
     def LoadDummyModel(self) -> Dict[str, Dict]:
@@ -1274,138 +1334,74 @@ class Builder:
             "facility 1": {
                 "type": "Interim storage",
                 "name": "Facility 1",
-                "dimensions": {
-                    "dx": 1.0,
-                    "dy": 1.0,
-                    "dz": 1.0
-                },
-                "position": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
+                "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                 "rooms": {
                     "room 1": {
                         "type": "Storage",
                         "name": "Room 1",
-                        "dimensions": {
-                            "dx": 1.0,
-                            "dy": 1.0,
-                            "dz": 1.0
-                        },
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                         "holdingAreas": {
                             "holdingArea 1": {
                                 "name": "HoldingArea 1",
-                                "position": {
-                                    "x": 0.0,
-                                    "y": 0.0,
-                                    "z": 0.0
-                            },
-                            "container": {
-                                "type": "Castor",
-                                "name": "Container 1",
-                                "dimensions": {
-                                    "dx": 1.0,
-                                    "dy": 1.0,
-                                    "dz": 1.0
-                                }
-                            }
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                                "container": {
+                                    "type": "Castor",
+                                    "name": "Container 1",
+                                    "dimensions": {
+                                        "dx": 1.0,
+                                        "dy": 1.0,
+                                        "dz": 1.0,
+                                    },
+                                },
                             },
                             "holdingArea 2": {
                                 "name": "HoldingArea 2",
-                                "position": {
-                                    "x": 0.0,
-                                    "y": 0.0,
-                                    "z": 0.0
-                                }
-                            }
-                        }
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                            },
+                        },
                     },
                     "room 2": {
                         "type": "Storage",
                         "name": "Room 1",
-                        "dimensions": {
-                            "dx": 1.0,
-                            "dy": 1.0,
-                            "dz": 1.0
-                        },
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                            },
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                         "holdingAreas": {
                             "holdingArea 1": {
                                 "name": "HoldingArea 1",
-                                "position": {
-                                    "x": 0.0,
-                                    "y": 0.0,
-                                    "z": 0.0
-                                }
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                             }
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             },
             "facility 2": {
                 "type": "Geological repository",
                 "name": "Facility 2",
-                "dimensions": {
-                    "dx": 1.0,
-                    "dy": 1.0,
-                    "dz": 1.0
-                },
-                "position": {
-                    "x": 0.0,
-                    "y": 0.0,
-                    "z": 0.0
-                },
+                "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                 "rooms": {
                     "room 1": {
                         "type": "Shaft",
                         "name": "Room 1",
-                        "dimensions": {
-                            "dx": 1.0,
-                            "dy": 1.0,
-                            "dz": 1.0
-                        },
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        }
-                        },
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                    },
                     "room 2": {
                         "type": "Drift",
                         "name": "Room 2",
-                        "dimensions": {
-                            "dx": 1.0,
-                            "dy": 1.0,
-                            "dz": 1.0
-                        },
-                        "position": {
-                            "x": 0.0,
-                            "y": 0.0,
-                            "z": 0.0
-                        },
+                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
+                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                         "holdingAreas": {
                             "holdingArea 1": {
                                 "name": "HoldingArea 1",
-                                "position": {
-                                    "x": 0.0,
-                                    "y": 0.0,
-                                    "z": 0.0
-                                }
+                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                             }
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
 
         return dummy_model
@@ -1423,7 +1419,7 @@ class Builder:
             Dict[str, Dict]: Dictionary with model data.
         """
         try:
-            with open(filePath, 'r') as file:
+            with open(filePath) as file:
                 data = json.load(file)
             return data
         except FileNotFoundError:
@@ -1434,16 +1430,28 @@ class Builder:
             if MonitoringSystem.verbosity > 0:
                 print(f"Error: The file '{filePath}' is not a valid JSON.")
             return None
-    
-    def ExportModelToFile(self, model: Dict[str, Dict]) -> None:
+
+    def ExportModelToFile(self, model: Dict[str, Dict], filePath: str) -> None:
         """
-        Creats a JSON file with model information.
+        Creates a JSON file with model information.
 
         Args:
             model (Dict[str, Dict]):
                 Dictionary that is to be exported to JSON file.
+            filePath (str):
+                Relative or absolute path to json file with model data.
         """
-        pass
+        try:
+            with open(filePath, "w") as file:
+                json.dump(model, file, indent=4)
+            if MonitoringSystem.verbosity > 0:
+                print(f"Model successfully saved to {filePath}.")
+        except OSError as e:
+            if MonitoringSystem.verbosity > 0:
+                print(
+                    f"""An error occurred while
+                    saving the model to {filePath}: {e}"""
+                )
 
     def CreateModelManually(self) -> Dict[str, Dict]:
         """
@@ -1453,7 +1461,7 @@ class Builder:
             Dict[str, Dict]: Dictionary with model data.
         """
         pass
-        
+
     def LoadDummyAdjacencyMatrix(self):
         """
         Creates dummy adjaceny matrix for dummy model data.
