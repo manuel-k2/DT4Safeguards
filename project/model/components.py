@@ -3,7 +3,7 @@ from typing import ClassVar, Dict
 from contextlib import contextmanager
 import json
 
-from projecttypes.units import Dimensions, Position
+from model.units import Dimensions, Position
 
 
 class InstanceNotFoundError(Exception):
