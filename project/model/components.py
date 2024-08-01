@@ -1,9 +1,121 @@
-from typing import Dict
+from dataclasses import dataclass, field
+from typing import ClassVar, Dict, List
 from contextlib import contextmanager
-
-from model.monitoringsystem import MonitoringSystem, IDClass
+import json
 
 from projecttypes.units import Dimensions, Position
+
+
+class InstanceNotFoundError(Exception):
+    """Exception raised when an instance with a given ID or given class name is not found."""
+
+    pass
+
+
+class MonitoringSystem:
+    """
+    A class to monitor all instances listed in a registry indexed by their IDs.
+
+    Attributes:
+        _registry (Dict[int, IDClass]): Class-level dictionary to store
+        instances of IDClass, indexed by integer IDs.
+        _id_counter (int): Class-level counter to generate unique IDs.
+    """
+
+    _registry: ClassVar[Dict[int, "IDClass"]] = {}
+    _id_counter: ClassVar[int] = 0
+
+    @classmethod
+    def register(cls, instance: "IDClass") -> int:
+        """
+        Registers an instance in the registry and assigns a unique ID.
+
+        Args:
+            instance (IDClass): The instance to be registered.
+
+        Returns:
+            int: The unique ID assigned to the instance.
+        """
+        instance_id = cls._id_counter
+        cls._registry[instance_id] = instance
+        cls._id_counter += 1
+        return instance_id
+
+    @classmethod
+    def get_instance(cls, id: int) -> "IDClass":
+        """
+        Retrieves an instance from the registry by its ID.
+
+        Args:
+            id (int): The ID of the instance to retrieve.
+
+        Returns:
+            Instance of IDClass if found.
+
+        Raises:
+            InstanceNotFoundError: If the instance with the
+                given ID is not found.
+        """
+        if id not in cls._registry:
+            print(f"Instance with ID '{id}' not found.")
+            raise InstanceNotFoundError()
+        return cls._registry[id]
+    
+    @classmethod
+    def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDClass"]:
+        """
+        Retrieves a list of all instances from the registry
+        that match the given class type.
+
+        Args:
+            class_type (type):
+                Class type for which instances are retrieved.
+
+        Returns:
+            Dict[int, Facility]:
+                Dictionary of all registered instances matching class type.
+        """
+        instance_inventory = {
+            id: instance for id, instance in cls._registry.items()
+            if isinstance(instance, class_type)
+        }
+
+        if not instance_inventory:
+            print(f"No instances of type '{class_type}' found.")
+            raise InstanceNotFoundError()
+        
+        return instance_inventory
+
+    @classmethod
+    def display_registry(cls) -> None:
+        """
+        Displays all instances in the registry.
+        """
+        if not cls._registry:
+            print("Registry is empty.")
+        else:
+            for id, instance in cls._registry.items():
+                print(f"ID: {id}, Instance: {instance}")
+
+
+@dataclass
+class IDClass:
+    """
+    The base class for all registrable instances
+    that get assigned a unique identifier.
+
+    Attributes:
+        id (int): The unique identifier for the instance.
+    """
+
+    id: int = field(init=False)
+
+    def __post_init__(self):
+        """
+        Registers the instance in the registry after initialization
+        and assigns a unique ID.
+        """
+        self.id = MonitoringSystem.register(self)
 
 
 class HistoryClass(IDClass):
@@ -32,7 +144,8 @@ class HistoryClass(IDClass):
         """
         if caller != Commander._authorized_commander:
             raise PermissionError(
-                "Activation can only be called within CreateTransportCommand."
+                """Activation can only be called
+                within Commander.CreateTransportCommand."""
             )
         self._activation(cmd)
 
@@ -954,7 +1067,7 @@ class Builder:
 
     def BuildModel(self, model: Dict[str, Dict]) -> None:
         """
-        Builds a model based on a dictionary-based
+        Builds a model on a dictionary-based
         input and an adjacency matrix.
 
         Args:
@@ -1046,10 +1159,53 @@ class Builder:
                             # Add container to holding area
                             holdingAreaInstance.AddContainer(containerInstance)
 
-        print("\nComplete registry:")
+        print("\nAll registered instances:")
         MonitoringSystem.display_registry()
 
-    def CreateDummyModel(self) -> Dict[str, Dict]:
+    def GetModel(self) -> Dict[str, Dict]:
+        """
+        Gets current state of model as
+        model dictionary and adjacency matrix.
+
+        Returns:
+            Dict[str, Dict]:
+                Dictionary containing names and structure of
+                facilities, rooms and holding areas.
+            :
+                Matrix specifying adjacency for rooms
+                through entries and exits.
+        """
+        model : Dict[str, Dict] = {}
+
+        # Get facilities from registry
+        faciliy_inventory: Dict[int, Facility] = MonitoringSystem.get_instace_by_type(Facility)
+
+        i: int = 1
+        for _id, facility in faciliy_inventory.items():
+            # Write stats into dictionary
+            model["facility "+str(i)] = {
+                "type": facility.type,
+                "name": facility.name,
+                "dimensions":  {
+                    "dx": facility.GetDimensions().GetX(),
+                    "dy": facility.GetDimensions().GetY(),
+                    "dz": facility.GetDimensions().GetZ()
+                },
+                "position": {
+                    "x": facility.GetPosition().GetX(),
+                    "y": facility.GetPosition().GetY(),
+                    "z": facility.GetPosition().GetZ()
+                }
+            }
+
+            # Get Rooms
+            room_inventory = facility.GetRoomInventory()
+            for _id, room in room_inventory.items():
+                pass
+            i+=1
+        return model
+
+    def LoadDummyModel(self) -> Dict[str, Dict]:
         """
         Creates a dictionary with dummy model data.
 
@@ -1060,76 +1216,174 @@ class Builder:
             "facility 1": {
                 "type": "Interim storage",
                 "name": "Facility 1",
-                "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
-                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                "dimensions": {
+                    "dx": 1.0,
+                    "dy": 1.0,
+                    "dz": 1.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
                 "rooms": {
                     "room 1": {
                         "type": "Storage",
                         "name": "Room 1",
-                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
-                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                        "dimensions": {
+                            "dx": 1.0,
+                            "dy": 1.0,
+                            "dz": 1.0
+                        },
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
                         "holdingAreas": {
                             "holdingArea 1": {
                                 "name": "HoldingArea 1",
-                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
-                                "container": {
-                                    "type": "Castor",
-                                    "name": "Container 1",
-                                    "dimensions": {
-                                        "dx": 1.0,
-                                        "dy": 1.0,
-                                        "dz": 1.0,
-                                    },
-                                },
+                                "position": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                            },
+                            "container": {
+                                "type": "Castor",
+                                "name": "Container 1",
+                                "dimensions": {
+                                    "dx": 1.0,
+                                    "dy": 1.0,
+                                    "dz": 1.0
+                                }
+                            }
                             },
                             "holdingArea 2": {
                                 "name": "HoldingArea 2",
-                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
-                            },
-                        },
+                                "position": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                }
+                            }
+                        }
                     },
                     "room 2": {
                         "type": "Storage",
                         "name": "Room 1",
-                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
-                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                        "dimensions": {
+                            "dx": 1.0,
+                            "dy": 1.0,
+                            "dz": 1.0
+                        },
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                            },
                         "holdingAreas": {
                             "holdingArea 1": {
                                 "name": "HoldingArea 1",
-                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                                "position": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                }
                             }
-                        },
-                    },
-                },
+                        }
+                    }
+                }
             },
             "facility 2": {
                 "type": "Geological repository",
                 "name": "Facility 2",
-                "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
-                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                "dimensions": {
+                    "dx": 1.0,
+                    "dy": 1.0,
+                    "dz": 1.0
+                },
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
                 "rooms": {
                     "room 1": {
                         "type": "Shaft",
                         "name": "Room 1",
-                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
-                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
-                    },
+                        "dimensions": {
+                            "dx": 1.0,
+                            "dy": 1.0,
+                            "dz": 1.0
+                        },
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        }
+                        },
                     "room 2": {
                         "type": "Drift",
                         "name": "Room 2",
-                        "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
-                        "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                        "dimensions": {
+                            "dx": 1.0,
+                            "dy": 1.0,
+                            "dz": 1.0
+                        },
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
                         "holdingAreas": {
                             "holdingArea 1": {
                                 "name": "HoldingArea 1",
-                                "position": {"x": 0.0, "y": 0.0, "z": 0.0},
+                                "position": {
+                                    "x": 0.0,
+                                    "y": 0.0,
+                                    "z": 0.0
+                                }
                             }
-                        },
-                    },
-                },
-            },
+                        }
+                    }
+                }
+            }
         }
+
         return dummy_model
+
+    def LoadModelFromFile(self, filePath: str) -> Dict[str, Dict]:
+        """
+        Creates a model based on a file in JSON format.
+        See data/dummy_model.json for syntax.
+
+        Args:
+            filePath (str):
+                Relative or absolute path to json file with model data.
+
+        Returns:
+            Dict[str, Dict]: Dictionary with model data.
+        """
+        try:
+            with open(filePath, 'r') as file:
+                data = json.load(file)
+            return data
+        except FileNotFoundError:
+            print(f"Error: The file '{filePath}' was not found.")
+            return None
+        except json.JSONDecodeError:
+            print(f"Error: The file '{filePath}' is not a valid JSON.")
+            return None
+    
+    def ExportModelToFile(self, model: Dict[str, Dict]) -> None:
+        """
+        Creats a JSON file with model information.
+
+        Args:
+            model (Dict[str, Dict]):
+                Dictionary that is to be exported to JSON file.
+        """
+        pass
 
     def CreateModelManually(self) -> Dict[str, Dict]:
         """
@@ -1139,21 +1393,8 @@ class Builder:
             Dict[str, Dict]: Dictionary with model data.
         """
         pass
-
-    def CreateModelFromFile(self, path: str) -> Dict[str, Dict]:
-        """
-        Creates a model based on a json file.
-        See dummy model for syntax.
-
-        Args:
-            path (str): Absolute path to file with model data.
-
-        Returns:
-            Dict[str, Dict]: Dictionary with model data.
-        """
-        pass
-
-    def CreateDummyAdjacencyMatrix(self):
+        
+    def LoadDummyAdjacencyMatrix(self):
         """
         Creates dummy adjaceny matrix for dummy model data.
         """
