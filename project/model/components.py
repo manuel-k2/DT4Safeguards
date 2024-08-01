@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import ClassVar, Dict, List
 from contextlib import contextmanager
+from copy import copy
 import json
 
 from projecttypes.units import Dimensions, Position
@@ -692,6 +693,27 @@ class HoldingArea(HistoryClass):
                 if IDClass.verbosity > 0:
                     print(f"Container: {container.name}, ID: {id}")
                 return container
+    
+    def _activation(self, cmd: "Command") -> None:
+        """
+        Registers a command passed to this instance and
+        activates certain functions based on the command type.
+
+        Args:
+            cmd (Command): Instance of command to be processed.
+        """
+        if type(cmd) is TransportCmd:
+            # If holding area is at origin of transport
+            origin_truncated = copy(cmd.origin).SetHoldingArea(None)
+            if self.location is origin_truncated:
+                self.RemoveContainer()
+            # If holding area is at destination of transport
+            destination_truncated = copy(cmd.destination).SetHoldingArea(None)
+            if self.location is destination_truncated:
+                self.AddContainer(cmd.target)
+
+        # Update own history
+        super().UpdateHistory(cmd)
 
 
 class Container(HistoryClass):
