@@ -1453,7 +1453,7 @@ class Builder:
             if MonitoringSystem.verbosity > 0:
                 print(
                     f"""An error occurred while
-                    saving the model to {filePath}:{e}"""
+saving the model to {filePath}: {e}"""
                 )
 
     def CreateModelManually(self) -> Dict[str, Dict]:
