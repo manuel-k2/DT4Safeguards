@@ -13,6 +13,9 @@ class Dimensions:
         self.SetY(dy)
         self.SetZ(dz)
 
+    def __repr__(self):
+        return f"{self.GetX()}, {self.GetY()}, {self.GetZ()}"
+
     def PrintDimensions(self) -> None:
         """
         Prints lengths in x, y, and z direction.
@@ -88,6 +91,9 @@ class Position:
         self.x = x
         self.y = y
         self.z = z
+
+    def __repr__(self) -> str:
+        return f"{self.GetX()}, {self.GetY()}, {self.GetZ()}"
 
     def SetX(self, x: float) -> None:
         """

@@ -155,19 +155,22 @@ class IDClass:
         self.id = MonitoringSystem.register(self)
 
 
+@dataclass
 class HistoryClass(IDClass):
     """
     The base class for all instances that come with a history that
     tracks all changes made to the instance.
 
     Attributes:
-        registry (Dict[int, dict]): Dictionary to store command
+        history (Dict[int, dict]): Dictionary to store command
             specifications.
     """
 
+    history: Dict[int, dict] = field(default_factory=dict)
+
     def __init__(self):
         super().__init__()
-        self.registry: Dict[int, dict] = {}
+        self.history = {}
 
     def Activation(self, cmd: "Command", caller: "Commander") -> None:
         """
@@ -203,7 +206,7 @@ class HistoryClass(IDClass):
         Args:
             cmd (Command): Instance of command to be processed.
         """
-        self.registry[cmd.id] = {"cmdType": cmd.type, "target": cmd.target}
+        self.history[cmd.id] = {"cmdType": cmd.type, "target": cmd.target}
 
     def GetHistory(self) -> Dict[int, dict]:
         """
@@ -212,19 +215,20 @@ class HistoryClass(IDClass):
         Returns:
             Dict[int, dict]: History of instance.
         """
-        return self.registry
+        return self.history
 
     def ShowHistory(self) -> None:
         """
         Shows history of instance.
         """
-        if not self.registry:
+        if not self.history:
             print("Registry is empty.")
         else:
-            for id, instance in self.registry.items():
+            for id, instance in self.history.items():
                 print(f"Command with ID: {id}, {instance}")
 
 
+@dataclass
 class Facility(HistoryClass):
     """
     A class that describes a facility.
@@ -233,9 +237,16 @@ class Facility(HistoryClass):
         type (str): Type of facility.
         name (str): Name of facility.
         dimensions (Dimensions): Dimensions of facility.
+        position (Position): Position of faility.
         room_inventory (Dict[int, Room]): Dictionary of rooms that are
             contained in facility.
     """
+
+    type: str = None
+    name: str = None
+    dimensions: Dimensions = None
+    position: Position = None
+    room_inventory: Dict[int, "Room"] = field(default_factory=dict)
 
     def __init__(
         self, type: str, name: str, dimensions: Dimensions, position: Position
@@ -245,7 +256,7 @@ class Facility(HistoryClass):
         self.SetName(name)
         self.SetDimensions(dimensions)
         self.SetPosition(position)
-        self.room_inventory: Dict[int, "Room"] = {}
+        self.room_inventory = {}
 
     def SetType(self, type: str) -> None:
         """
@@ -369,6 +380,7 @@ class Facility(HistoryClass):
         pass
 
 
+@dataclass
 class Room(HistoryClass):
     """
     A class that describes a room.
@@ -377,10 +389,20 @@ class Room(HistoryClass):
         type (str): Type of room.
         name (str): Name of room.
         dimensions (Dimensions): Dimensions of room.
+        position (Position): Position of room.
         location (Location): Location of room.
         holdingarea_inventory (Dict[int, HoldingArea]): Dictionary of
             holding areas that are contained in room.
     """
+
+    type: str = None
+    name: str = None
+    dimensions: Dimensions = None
+    position: Position = None
+    location: "Location" = None
+    holdingArea_inventory: Dict[int, "HoldingArea"] = field(
+        default_factory=dict
+    )
 
     def __init__(
         self, type: str, name: str, dimensions: Dimensions, position: Position
@@ -389,9 +411,8 @@ class Room(HistoryClass):
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
-        self.location: Location = None
         self.SetPosition(position)
-        self.holdingArea_inventory: Dict[int, "HoldingArea"] = {}
+        self.holdingArea_inventory = {}
 
     def SetType(self, type: str) -> None:
         """
@@ -548,6 +569,7 @@ class Room(HistoryClass):
         pass
 
 
+@dataclass
 class HoldingArea(HistoryClass):
     """
     A class that describes a holding area for containers.
@@ -555,6 +577,7 @@ class HoldingArea(HistoryClass):
 
     Attributes:
         name (str): Name of holding area.
+        position (Position): Position of holding area.
         location (Location): Location of holding area.
         occupationStatus (bool):
             True if holding area is occupied by container, False if not.
@@ -562,13 +585,17 @@ class HoldingArea(HistoryClass):
             Dictionary of container in holding area.
     """
 
+    name: str = None
+    position: Position = None
+    location: "Location" = None
+    container_inventory: Dict[int, "Container"] = field(default_factory=dict)
+
     def __init__(self, name: str, position: Position):
         super().__init__()
         self.SetName(name)
         self.SetOccupationStatus(False)
-        self.location: Location = None
         self.SetPosition(position)
-        self.container_inventory: Dict[int, "Container"] = {}
+        self.container_inventory = {}
 
     def SetName(self, name: str) -> None:
         """
@@ -721,6 +748,7 @@ class HoldingArea(HistoryClass):
         super().UpdateHistory(cmd)
 
 
+@dataclass
 class Container(HistoryClass):
     """
     A class that describes a container for nuclear material.
@@ -733,12 +761,16 @@ class Container(HistoryClass):
 
     """
 
+    type: str = None
+    name: str = None
+    dimensions: Dimensions = None
+    location: "Location" = None
+
     def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
         self.SetType(type)
         self.SetName(name)
         self.SetDimensions(dimensions)
-        self.location: Location = None
 
     def SetType(self, type: str) -> None:
         """
@@ -836,6 +868,7 @@ class Container(HistoryClass):
         super().UpdateHistory(cmd)
 
 
+@dataclass
 class Location:
     """
     A class that specifies the location of an instance
@@ -846,6 +879,10 @@ class Location:
         room (Room): Corresponding room instance.
         holdingArea (HoldingArea): Corresponding holding area instance.
     """
+
+    facility: Facility
+    room: Room
+    holdingArea: HoldingArea
 
     def __init__(self, *args):
         if len(args) > 0:
@@ -860,6 +897,13 @@ class Location:
             self.SetHoldingArea(args[2])
         else:
             self.SetHoldingArea(None)
+
+    def __repr__(self) -> str:
+        return (
+            f"({self.facility.GetName()}, "
+            f"{self.room.GetName()}, "
+            f"{self.holdingArea.GetName()})"
+        )
 
     def SetFacility(self, facility: Facility) -> None:
         """
