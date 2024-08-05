@@ -114,6 +114,12 @@
                 },
                 "holdingAreas": {
                     "holdingArea 1": {
+                        "name": "HoldingArea 1",
+                        "position": {
+                            "x": 0.0,
+                            "y": 0.0,
+                            "z": 0.0
+                        },
                         "container": {
                             "type": "Castor",
                             "name": "Container 1",

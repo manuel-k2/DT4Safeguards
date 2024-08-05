@@ -1147,58 +1147,58 @@ class Builder:
         if not model:
             raise KeyError("Model must contain at least one facility.")
 
-        for _facility, stats in model.items():
+        for _facility, facility_stats in model.items():
             facilityInstance = Facility(
-                type=stats["type"],
-                name=stats["name"],
+                type=facility_stats["type"],
+                name=facility_stats["name"],
                 dimensions=Dimensions(
-                    stats["dimensions"]["dx"],
-                    stats["dimensions"]["dy"],
-                    stats["dimensions"]["dx"],
+                    facility_stats["dimensions"]["dx"],
+                    facility_stats["dimensions"]["dy"],
+                    facility_stats["dimensions"]["dx"],
                 ),
                 position=Position(
-                    stats["position"]["x"],
-                    stats["position"]["y"],
-                    stats["position"]["z"],
+                    facility_stats["position"]["x"],
+                    facility_stats["position"]["y"],
+                    facility_stats["position"]["z"],
                 ),
             )
 
             # Initialize room with data from dictionary
             #       Facility MUST contain at least one room.
-            if not stats["rooms"]:
+            if not facility_stats["rooms"]:
                 raise KeyError("Facility must contain at least one room.")
 
-            model_2: Dict[str, Dict] = stats["rooms"]
-            for _room, stats_2 in model_2.items():
+            model_2: Dict[str, Dict] = facility_stats["rooms"]
+            for _room, room_stats in model_2.items():
                 roomInstance = Room(
-                    type=stats_2["type"],
-                    name=stats_2["name"],
+                    type=room_stats["type"],
+                    name=room_stats["name"],
                     dimensions=Dimensions(
-                        stats_2["dimensions"]["dx"],
-                        stats_2["dimensions"]["dy"],
-                        stats_2["dimensions"]["dx"],
+                        room_stats["dimensions"]["dx"],
+                        room_stats["dimensions"]["dy"],
+                        room_stats["dimensions"]["dx"],
                     ),
                     position=Position(
-                        stats_2["position"]["x"],
-                        stats_2["position"]["y"],
-                        stats_2["position"]["z"],
+                        room_stats["position"]["x"],
+                        room_stats["position"]["y"],
+                        room_stats["position"]["z"],
                     ),
                 )
 
                 # Add room to facility
                 facilityInstance.AddRoom(roomInstance)
 
-                if len(stats_2) > 4:
+                if len(room_stats) > 4:
                     # Initialize holding area with data from dictionary
                     #       Room MAY contain holding areas.
-                    model_3: Dict[str, Dict] = stats_2["holdingAreas"]
-                    for _holdingArea, stats_3 in model_3.items():
+                    model_3: Dict[str, Dict] = room_stats["holdingAreas"]
+                    for _holdingArea, holdingArea_stats in model_3.items():
                         holdingAreaInstance = HoldingArea(
-                            name=stats_3["name"],
+                            name=holdingArea_stats["name"],
                             position=Position(
-                                stats_3["position"]["x"],
-                                stats_3["position"]["y"],
-                                stats_3["position"]["z"],
+                                holdingArea_stats["position"]["x"],
+                                holdingArea_stats["position"]["y"],
+                                holdingArea_stats["position"]["z"],
                             ),
                         )
 
@@ -1207,8 +1207,8 @@ class Builder:
 
                         # Initialize container with data from dictionary
                         #       Holding area MAY contain a container.
-                        if len(stats_3) > 2:
-                            model_4: Dict = stats_3["container"]
+                        if len(holdingArea_stats) > 2:
+                            model_4: Dict = holdingArea_stats["container"]
                             containerInstance = Container(
                                 type=model_4["type"],
                                 name=model_4["name"],
@@ -1308,16 +1308,14 @@ class Builder:
                         if container:
                             model["facility " + str(i)]["rooms"][
                                 "room " + str(j)
-                            ]["holdingAreas"]["holdingArea " + str(k)] = {
-                                "container": {
-                                    "type": container.type,
-                                    "name": container.name,
-                                    "dimensions": {
-                                        "dx": container.GetDimensions().GetX(),
-                                        "dy": container.GetDimensions().GetY(),
-                                        "dz": container.GetDimensions().GetZ(),
-                                    },
-                                }
+                            ]["holdingAreas"]["holdingArea " + str(k)]["container"] = {
+                                "type": container.type,
+                                "name": container.name,
+                                "dimensions": {
+                                    "dx": container.GetDimensions().GetX(),
+                                    "dy": container.GetDimensions().GetY(),
+                                    "dz": container.GetDimensions().GetZ(),
+                                },
                             }
                         k += 1
                     k = 1
