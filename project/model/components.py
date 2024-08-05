@@ -1242,9 +1242,9 @@ class Builder:
         model: Dict[str, Dict] = {}
 
         # Get facilities from registry and write stats into dictionary
-        faciliy_inventory: Dict[
-            int, Facility
-        ] = MonitoringSystem.get_instace_by_type(Facility)
+        faciliy_inventory: Dict[int, Facility] = (
+            MonitoringSystem.get_instace_by_type(Facility)
+        )
         i: int = 1
         for _id, facility in faciliy_inventory.items():
             model["facility " + str(i)] = {
@@ -1283,9 +1283,9 @@ class Builder:
                 }
 
                 # Get Holding areas (if any)
-                holdingArea_inventory: Dict[
-                    int, HoldingArea
-                ] = room.GetHoldingAreaInventory()
+                holdingArea_inventory: Dict[int, HoldingArea] = (
+                    room.GetHoldingAreaInventory()
+                )
                 if holdingArea_inventory:
                     model["facility " + str(i)]["rooms"]["room " + str(j)][
                         "holdingAreas"
