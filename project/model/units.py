@@ -3,10 +3,14 @@ class Dimensions:
     A class that specifies dimensions of an instance.
 
     Attributes:
-            dx (float): Length in x direction.
-            dy (float): Length in y direction.
-            dz (float): Length in z direction.
+            _dx (float): Length in x direction.
+            _dy (float): Length in y direction.
+            _dz (float): Length in z direction.
     """
+
+    _dx: float
+    _dy: float
+    _dz: float
 
     def __init__(self, dx, dy, dz):
         self.SetX(dx)
@@ -20,13 +24,7 @@ class Dimensions:
         Returns:
             str: String representation of the Dimension instance.
         """
-        return f"(dx={self.dx}, dy={self.dy}, dz={self.dz})"
-
-    def PrintDimensions(self) -> None:
-        """
-        Prints lengths in x, y, and z direction.
-        """
-        print(self.GetX(), self.GetY(), self.GetZ())
+        return f"(dx={self._dx}, dy={self._dy}, dz={self._dz})"
 
     def SetX(self, dx: float) -> None:
         """
@@ -35,7 +33,7 @@ class Dimensions:
         Args:
             dx (float): Length in x direction.
         """
-        self.dx: float = dx
+        self._dx: float = dx
 
     def GetX(self) -> float:
         """
@@ -44,7 +42,7 @@ class Dimensions:
         Returns:
             float: Length in x direction.
         """
-        return self.dx
+        return float(self._dx)
 
     def SetY(self, dy: float) -> None:
         """
@@ -53,7 +51,7 @@ class Dimensions:
         Args:
             dy (float): Length in y direction.
         """
-        self.dy: float = dy
+        self._dy: float = dy
 
     def GetY(self) -> float:
         """
@@ -62,7 +60,7 @@ class Dimensions:
         Returns:
             float: Length in y direction.
         """
-        return self.dy
+        return float(self._dy)
 
     def SetZ(self, dz: float) -> None:
         """
@@ -71,7 +69,7 @@ class Dimensions:
         Args:
             dz (float): Length in z direction.
         """
-        self.dz: float = dz
+        self._dz: float = dz
 
     def GetZ(self) -> float:
         """
@@ -80,7 +78,7 @@ class Dimensions:
         Returns:
             float: Length in z direction.
         """
-        return self.dz
+        return float(self._dz)
 
 
 class Position:
@@ -88,10 +86,14 @@ class Position:
     A class that represents a position in Cartesian space.
 
     Attributes:
-        x (float): x coordinate.
-        y (float): y coordinate.
-        z (float): z coordinate.
+        _x (float): x coordinate.
+        _y (float): y coordinate.
+        _z (float): z coordinate.
     """
+
+    _x: float
+    _y: float
+    _z: float
 
     def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
         self.SetX(x)
@@ -108,7 +110,7 @@ class Position:
         Returns:
             Position: A new Position instance which is the vector sum.
         """
-        return Position(self.x + other.x, self.y + other.y, self.z + other.z)
+        return Position(self._x + other._x, self._y + other._y, self._z + other._z)
 
     def __sub__(self, other: 'Position') -> 'Position':
         """
@@ -120,7 +122,7 @@ class Position:
         Returns:
             Position: A new Position instance which is the vector difference.
         """
-        return Position(self.x - other.x, self.y - other.y, self.z - other.z)
+        return Position(self._x - other._x, self._y - other._y, self._z - other._z)
 
     def __repr__(self) -> str:
         """
@@ -129,46 +131,40 @@ class Position:
         Returns:
             str: String representation of the Position instance.
         """
-        return f"(x={self.x}, y={self.y}, z={self.z})"
+        return f"(x={self._x}, y={self._y}, z={self._z})"
 
     def SetX(self, x: float) -> None:
         """
         Sets the x coordinate.
         """
-        self.x = x
+        self._x: float = x
 
     def GetX(self) -> float:
         """
         Gets the x coordinate.
         """
-        return self.x
+        return float(self._x)
 
     def SetY(self, y: float) -> None:
         """
         Sets the y coordinate.
         """
-        self.y = y
+        self._y: float = y
 
     def GetY(self) -> float:
         """
         Gets the y coordinate.
         """
-        return self.y
+        return float(self._y)
 
     def SetZ(self, z: float) -> None:
         """
         Sets the z coordinate.
         """
-        self.z = z
+        self._z: float = z
 
     def GetZ(self) -> float:
         """
         Gets the z coordinate.
         """
-        return self.z
-
-    def PrintPosition(self) -> None:
-        """
-        Prints position of instance in Cartesian space.
-        """
-        print(f"Position(x={self._x}, y={self._y}, z={self._z})")
+        return float(self._z)
