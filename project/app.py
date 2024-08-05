@@ -24,15 +24,16 @@ destination.SetHoldingArea(holdingArea_destination)
 commander = Commander()
 commander.IssueTransportCommand(target, origin, destination)
 
-# Print new container location and histories
+# Print new container location and history
 # print("\nLocation - Container 1 (PostTransport)")
 # container_1.GetLocation().PrintLocation()
 # print("\nHistory - Container 1")
 # container_1.ShowHistory()
 
-# facility_1: Facility = MonitoringSystem.get_instance(id=0)
-# print("History - Facility 1")
-# facility_1.ShowHistory()
+# Print facility histories
+facility_1: Facility = MonitoringSystem.get_instance(id=0)
+print("History - Facility 1")
+facility_1.ShowHistory()
 
 # facility_2: Facility = MonitoringSystem.get_instance(id=7)
 # print("History - Facility 2")
