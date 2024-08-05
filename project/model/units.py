@@ -20,7 +20,7 @@ class Dimensions:
     def __repr__(self) -> str:
         """
         Provides a string representation of the Dimension instance.
-        
+
         Returns:
             str: String representation of the Dimension instance.
         """
@@ -99,8 +99,8 @@ class Position:
         self.SetX(x)
         self.SetY(y)
         self.SetZ(z)
-    
-    def __add__(self, other: 'Position') -> 'Position':
+
+    def __add__(self, other: "Position") -> "Position":
         """
         Adds two Position instances as 3D vectors.
 
@@ -110,9 +110,11 @@ class Position:
         Returns:
             Position: A new Position instance which is the vector sum.
         """
-        return Position(self._x + other._x, self._y + other._y, self._z + other._z)
+        return Position(
+            self._x + other._x, self._y + other._y, self._z + other._z
+        )
 
-    def __sub__(self, other: 'Position') -> 'Position':
+    def __sub__(self, other: "Position") -> "Position":
         """
         Subtracts one Position instance from another as 3D vectors.
 
@@ -122,12 +124,14 @@ class Position:
         Returns:
             Position: A new Position instance which is the vector difference.
         """
-        return Position(self._x - other._x, self._y - other._y, self._z - other._z)
+        return Position(
+            self._x - other._x, self._y - other._y, self._z - other._z
+        )
 
     def __repr__(self) -> str:
         """
         Provides a string representation of the Position instance.
-        
+
         Returns:
             str: String representation of the Position instance.
         """

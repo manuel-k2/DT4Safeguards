@@ -41,7 +41,7 @@ class MonitoringSystem:
             level (int): Verbosity level (0: Silent, 1: Verbose).
         """
         cls._verbosity = level
-    
+
     @classmethod
     def get_verbosity(cls) -> int:
         """
@@ -93,7 +93,7 @@ class MonitoringSystem:
         return instance
 
     @classmethod
-    def get_instace_by_type(cls, class_type: type) -> Dict[int, 'IDClass']:
+    def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDClass"]:
         """
         Retrieves a list of all instances from the registry
         that match the given class type.
@@ -175,7 +175,7 @@ class IDClass:
         and assigns a unique ID.
         """
         self._id = MonitoringSystem.register(self)
-    
+
     def GetID(self) -> int:
         """
         Gets unique ID of instance.
@@ -235,7 +235,10 @@ class HistoryClass(IDClass):
         Args:
             cmd (Command): Instance of command to be processed.
         """
-        self._history[cmd.GetID()] = {"cmdType": cmd.GetType(), "target": cmd.GetTarget()}
+        self._history[cmd.GetID()] = {
+            "cmdType": cmd.GetType(),
+            "target": cmd.GetTarget(),
+        }
 
     def GetHistory(self) -> Dict[int, dict]:
         """
@@ -428,7 +431,7 @@ class Room(HistoryClass):
     _name: str = None
     _dimensions: Dimensions = None
     _position: Position = None
-    _location: 'Location' = None
+    _location: "Location" = None
     _holdingArea_inventory: Dict[int, "HoldingArea"] = field(
         default_factory=dict
     )
@@ -497,7 +500,7 @@ class Room(HistoryClass):
         """
         return copy(self._dimensions)
 
-    def SetLocation(self, location: 'Location') -> None:
+    def SetLocation(self, location: "Location") -> None:
         """
         Sets room location room.
         Called when added to a facility.
@@ -514,7 +517,7 @@ class Room(HistoryClass):
         else:
             self._location: Location = location
 
-    def GetLocation(self) -> 'Location':
+    def GetLocation(self) -> "Location":
         """
         Gets location of room instance.
 
@@ -616,8 +619,8 @@ class HoldingArea(HistoryClass):
 
     _name: str = None
     _position: Position = None
-    _location: 'Location' = None
-    _container_inventory: Dict[int, 'Container'] = field(default_factory=dict)
+    _location: "Location" = None
+    _container_inventory: Dict[int, "Container"] = field(default_factory=dict)
 
     def __init__(self, name: str, position: Position):
         super().__init__()
@@ -644,7 +647,7 @@ class HoldingArea(HistoryClass):
         """
         return str(self._name)
 
-    def SetLocation(self, location: 'Location') -> None:
+    def SetLocation(self, location: "Location") -> None:
         """
         Sets holding area location. Called when added to room.
 
@@ -660,7 +663,7 @@ class HoldingArea(HistoryClass):
         else:
             self._location: Location = location
 
-    def GetLocation(self) -> 'Location':
+    def GetLocation(self) -> "Location":
         """
         Gets location of holding area.
 
@@ -706,7 +709,7 @@ class HoldingArea(HistoryClass):
         """
         return bool(self._occupationStatus)
 
-    def AddContainer(self, container: 'Container') -> None:
+    def AddContainer(self, container: "Container") -> None:
         """
         Adds container to holding area.
 
@@ -721,7 +724,7 @@ class HoldingArea(HistoryClass):
             container_location = Location(
                 self.GetLocation().GetFacility(),
                 self.GetLocation().GetRoom(),
-                self
+                self,
             )
             container.SetLocation(container_location)
 
@@ -742,7 +745,7 @@ class HoldingArea(HistoryClass):
         self._container_inventory.clear()
         self.SetOccupationStatus(False)
 
-    def GetContainer(self) -> 'Container':
+    def GetContainer(self) -> "Container":
         """
         Gets the container contained in holding area.
 
@@ -795,7 +798,7 @@ class Container(HistoryClass):
     _type: str = None
     _name: str = None
     _dimensions: Dimensions = None
-    _location: 'Location' = None
+    _location: "Location" = None
 
     def __init__(self, type: str, name: str, dimensions: Dimensions):
         super().__init__()
@@ -858,7 +861,7 @@ class Container(HistoryClass):
         """
         return copy(self._dimensions)
 
-    def SetLocation(self, location: 'Location') -> None:
+    def SetLocation(self, location: "Location") -> None:
         """
         Sets container location.
 
@@ -874,7 +877,7 @@ class Container(HistoryClass):
         else:
             self._location: Location = location
 
-    def GetLocation(self) -> 'Location':
+    def GetLocation(self) -> "Location":
         """
         Gets current location of container.
 
@@ -932,7 +935,7 @@ class Location:
     def __repr__(self) -> str:
         """
         Provides a string representation of the Location instance.
-        
+
         Returns:
             str: String representation of the Location instance.
         """
@@ -1000,10 +1003,16 @@ class Location:
         """
         Prints facility and room IDs of location.
         """
-        if self.GetFacility/() is not None:
-            print(f"Facility: {self.GetFacility().GetName()}, ID: {self.GetFacility().GetID()}")
+        if self.GetFacility / () is not None:
+            print(
+                f"Facility: {self.GetFacility().GetName()}, "
+                f"ID: {self.GetFacility().GetID()}"
+            )
         if self.GetRoom() is not None:
-            print(f"Room: {self.GetRoom().GetName()}, ID: {self.GetRoom().GetID()}")
+            print(
+                f"Room: {self.GetRoom().GetName()}, "
+                f"ID: {self.GetRoom().GetID()}"
+            )
         if self.GetHoldingArea() is not None:
             hAN = self.GetHoldingArea().GetName()
             hAID = self.GetHoldingArea().GetID()
