@@ -1308,7 +1308,9 @@ class Builder:
                         if container:
                             model["facility " + str(i)]["rooms"][
                                 "room " + str(j)
-                            ]["holdingAreas"]["holdingArea " + str(k)]["container"] = {
+                            ]["holdingAreas"]["holdingArea " + str(k)][
+                                "container"
+                            ] = {
                                 "type": container.type,
                                 "name": container.name,
                                 "dimensions": {
