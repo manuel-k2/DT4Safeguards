@@ -105,7 +105,7 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
 
         if cls.verbosity > 0:
-            print(f"Instances of type {class_type.__name__}:")
+            print(f"Instances of type {class_type.__name__}: ")
             for id, instance in instance_inventory.items():
                 print(f"ID: {id}, Instance: {instance}")
 
