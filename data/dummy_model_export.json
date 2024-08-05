@@ -26,8 +26,8 @@
                     "y": 0.0,
                     "z": 0.0
                 },
-                "holdingAreas": {
-                    "holdingArea 1": {
+                "holding_areas": {
+                    "holding_area 1": {
                         "name": "HoldingArea 1",
                         "position": {
                             "x": 0.0,
@@ -35,7 +35,7 @@
                             "z": 0.0
                         }
                     },
-                    "holdingArea 2": {
+                    "holding_area 2": {
                         "name": "HoldingArea 2",
                         "position": {
                             "x": 0.0,
@@ -58,8 +58,8 @@
                     "y": 0.0,
                     "z": 0.0
                 },
-                "holdingAreas": {
-                    "holdingArea 1": {
+                "holding_areas": {
+                    "holding_area 1": {
                         "name": "HoldingArea 1",
                         "position": {
                             "x": 0.0,
@@ -112,8 +112,8 @@
                     "y": 0.0,
                     "z": 0.0
                 },
-                "holdingAreas": {
-                    "holdingArea 1": {
+                "holding_areas": {
+                    "holding_area 1": {
                         "name": "HoldingArea 1",
                         "position": {
                             "x": 0.0,

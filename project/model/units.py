@@ -13,9 +13,9 @@ class Dimensions:
     _dz: float
 
     def __init__(self, dx, dy, dz):
-        self.SetX(dx)
-        self.SetY(dy)
-        self.SetZ(dz)
+        self.set_x(dx)
+        self.set_y(dy)
+        self.set_z(dz)
 
     def __repr__(self) -> str:
         """
@@ -26,7 +26,7 @@ class Dimensions:
         """
         return f"(dx={self._dx}, dy={self._dy}, dz={self._dz})"
 
-    def SetX(self, dx: float) -> None:
+    def set_x(self, dx: float) -> None:
         """
         Sets length in x direction.
 
@@ -35,7 +35,7 @@ class Dimensions:
         """
         self._dx: float = dx
 
-    def GetX(self) -> float:
+    def get_x(self) -> float:
         """
         Gets length in x direction.
 
@@ -44,7 +44,7 @@ class Dimensions:
         """
         return float(self._dx)
 
-    def SetY(self, dy: float) -> None:
+    def set_y(self, dy: float) -> None:
         """
         Sets length in z direction.
 
@@ -53,7 +53,7 @@ class Dimensions:
         """
         self._dy: float = dy
 
-    def GetY(self) -> float:
+    def get_y(self) -> float:
         """
         Gets length in z direction.
 
@@ -62,7 +62,7 @@ class Dimensions:
         """
         return float(self._dy)
 
-    def SetZ(self, dz: float) -> None:
+    def set_z(self, dz: float) -> None:
         """
         Sets length in z direction..
 
@@ -71,7 +71,7 @@ class Dimensions:
         """
         self._dz: float = dz
 
-    def GetZ(self) -> float:
+    def get_z(self) -> float:
         """
         Gets length in z direction..
 
@@ -96,9 +96,9 @@ class Position:
     _z: float
 
     def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
-        self.SetX(x)
-        self.SetY(y)
-        self.SetZ(z)
+        self.set_x(x)
+        self.set_y(y)
+        self.set_z(z)
 
     def __add__(self, other: "Position") -> "Position":
         """
@@ -137,37 +137,37 @@ class Position:
         """
         return f"(x={self._x}, y={self._y}, z={self._z})"
 
-    def SetX(self, x: float) -> None:
+    def set_x(self, x: float) -> None:
         """
         Sets the x coordinate.
         """
         self._x: float = x
 
-    def GetX(self) -> float:
+    def get_x(self) -> float:
         """
         Gets the x coordinate.
         """
         return float(self._x)
 
-    def SetY(self, y: float) -> None:
+    def set_y(self, y: float) -> None:
         """
         Sets the y coordinate.
         """
         self._y: float = y
 
-    def GetY(self) -> float:
+    def get_y(self) -> float:
         """
         Gets the y coordinate.
         """
         return float(self._y)
 
-    def SetZ(self, z: float) -> None:
+    def set_z(self, z: float) -> None:
         """
         Sets the z coordinate.
         """
         self._z: float = z
 
-    def GetZ(self) -> float:
+    def get_z(self) -> float:
         """
         Gets the z coordinate.
         """
