@@ -13,8 +13,14 @@ class Dimensions:
         self.SetY(dy)
         self.SetZ(dz)
 
-    def __repr__(self):
-        return f"{self.GetX()}, {self.GetY()}, {self.GetZ()}"
+    def __repr__(self) -> str:
+        """
+        Provides a string representation of the Dimension instance.
+        
+        Returns:
+            str: String representation of the Dimension instance.
+        """
+        return f"(dx={self.dx}, dy={self.dy}, dz={self.dz})"
 
     def PrintDimensions(self) -> None:
         """
@@ -88,12 +94,42 @@ class Position:
     """
 
     def __init__(self, x: float = 0.0, y: float = 0.0, z: float = 0.0):
-        self.x = x
-        self.y = y
-        self.z = z
+        self.SetX(x)
+        self.SetY(y)
+        self.SetZ(z)
+    
+    def __add__(self, other: 'Position') -> 'Position':
+        """
+        Adds two Position instances as 3D vectors.
+
+        Args:
+            other (Position): The other Position instance to add.
+
+        Returns:
+            Position: A new Position instance which is the vector sum.
+        """
+        return Position(self.x + other.x, self.y + other.y, self.z + other.z)
+
+    def __sub__(self, other: 'Position') -> 'Position':
+        """
+        Subtracts one Position instance from another as 3D vectors.
+
+        Args:
+            other (Position): The other Position instance to subtract.
+
+        Returns:
+            Position: A new Position instance which is the vector difference.
+        """
+        return Position(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def __repr__(self) -> str:
-        return f"{self.GetX()}, {self.GetY()}, {self.GetZ()}"
+        """
+        Provides a string representation of the Position instance.
+        
+        Returns:
+            str: String representation of the Position instance.
+        """
+        return f"(x={self.x}, y={self.y}, z={self.z})"
 
     def SetX(self, x: float) -> None:
         """

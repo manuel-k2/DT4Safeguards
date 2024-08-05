@@ -81,7 +81,7 @@ class MonitoringSystem:
         return instance
 
     @classmethod
-    def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDClass"]:
+    def get_instace_by_type(cls, class_type: type) -> Dict[int, 'IDClass']:
         """
         Retrieves a list of all instances from the registry
         that match the given class type.
@@ -899,6 +899,12 @@ class Location:
             self.SetHoldingArea(None)
 
     def __repr__(self) -> str:
+        """
+        Provides a string representation of the Location instance.
+        
+        Returns:
+            str: String representation of the Location instance.
+        """
         return (
             f"({self.facility.GetName()}, "
             f"{self.room.GetName()}, "
