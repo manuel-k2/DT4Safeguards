@@ -21,14 +21,14 @@ class MonitoringSystem:
     A class to monitor all instances listed in a registry indexed by their IDs.
 
     Attributes:
-        _registry (Dict[int, IDClass]):
+        _registry (Dict[int, IDObject]):
             Class-level dictionary to store instances
-            of IDClass, indexed by integer IDs.
+            of IDObject, indexed by integer IDs.
         _id_counter (int): Class-level counter to generate unique IDs.
         _verbosity (int): Class-level verbosity setting.
     """
 
-    _registry: ClassVar[Dict[int, "IDClass"]] = {}
+    _registry: ClassVar[Dict[int, "IDObject"]] = {}
     _id_counter: ClassVar[int] = 0
     _verbosity: ClassVar[int] = 0  # 0: Silent, 1: Verbose
 
@@ -53,12 +53,12 @@ class MonitoringSystem:
         return int(cls._verbosity)
 
     @classmethod
-    def register(cls, instance: "IDClass") -> int:
+    def register(cls, instance: "IDObject") -> int:
         """
         Registers an instance in the registry and assigns a unique ID.
 
         Args:
-            instance (IDClass): The instance to be registered.
+            instance (IDObject): The instance to be registered.
 
         Returns:
             int: The unique ID assigned to the instance.
@@ -69,7 +69,7 @@ class MonitoringSystem:
         return instance_id
 
     @classmethod
-    def get_instance(cls, id: int) -> "IDClass":
+    def get_instance(cls, id: int) -> "IDObject":
         """
         Retrieves an instance from the registry by its ID.
 
@@ -77,7 +77,7 @@ class MonitoringSystem:
             id (int): The ID of the instance to retrieve.
 
         Returns:
-            Instance of IDClass if found.
+            Instance of IDObject if found.
 
         Raises:
             InstanceNotFoundError: If the instance with the
@@ -93,7 +93,7 @@ class MonitoringSystem:
         return instance
 
     @classmethod
-    def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDClass"]:
+    def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDObject"]:
         """
         Retrieves a list of all instances from the registry
         that match the given class type.
@@ -136,7 +136,7 @@ class MonitoringSystem:
 
 
 @dataclass
-class IDClass:
+class IDObject:
     """
     The base class for all registrable instances
     that get assigned a unique identifier.
@@ -186,7 +186,7 @@ class IDClass:
         return int(self._id)
 
 
-class HistoryClass(IDClass):
+class HistoryObject(IDObject):
     """
     The base class for all instances that come with a history that
     tracks all changes made to the instance.
@@ -261,7 +261,7 @@ class HistoryClass(IDClass):
 
 
 @dataclass
-class Facility(HistoryClass):
+class Facility(HistoryObject):
     """
     A class that describes a facility.
 
@@ -378,19 +378,19 @@ class Facility(HistoryClass):
         # Add room to inventory
         self._room_inventory[room.get_id()] = room
 
-    def remove_room(self, roomID: int) -> None:
+    def remove_room(self, room_id: int) -> None:
         """
         Removes a room from the facility's room inventory.
 
         Args:
-            roomID (int): ID of room to be removed from inventory.
+            room_id (int): ID of room to be removed from inventory.
         """
-        if roomID not in self._room_inventory:
-            raise KeyError(f"Room with ID {roomID} not found.")
-        if len(self._room_inventory) == 1 and roomID in self._room_inventory:
+        if room_id not in self._room_inventory:
+            raise KeyError(f"Room with ID {room_id} not found.")
+        if len(self._room_inventory) == 1 and room_id in self._room_inventory:
             self._room_inventory.clear()
         else:
-            del self._room_inventory[roomID]
+            del self._room_inventory[room_id]
 
     def get_room_inventory(self) -> Dict[int, "Room"]:
         """
@@ -400,7 +400,7 @@ class Facility(HistoryClass):
             Dict[int, Room]: Dictionary of rooms that are contained
                 in facility.
         """
-        if IDClass.get_verbosity() > 0:
+        if IDObject.get_verbosity() > 0:
             if not self._room_inventory:
                 print("Inventory is empty.")
             else:
@@ -410,7 +410,7 @@ class Facility(HistoryClass):
 
 
 @dataclass
-class Room(HistoryClass):
+class Room(HistoryObject):
     """
     A class that describes a room.
 
@@ -557,23 +557,23 @@ class Room(HistoryClass):
         # Add holding area to inventory
         self._holding_area_inventory[holding_area.get_id()] = holding_area
 
-    def remove_holding_area(self, holding_areaID: int) -> None:
+    def remove_holding_area(self, holding_area_id: int) -> None:
         """
         Removes a holding area from the rooms's holding area inventory.
 
         Args:
-            holding_areaID (int):
+            holding_area_id (int):
                 ID of holding area to be removed from inventory.
         """
-        if holding_areaID not in self._holding_area_inventory:
-            raise KeyError(f"Holding area with ID {holding_areaID} not found.")
+        if holding_area_id not in self._holding_area_inventory:
+            raise KeyError(f"Holding area with ID {holding_area_id} not found.")
         if (
             len(self._holding_area_inventory) == 1
-            and holding_areaID in self._holding_area_inventory
+            and holding_area_id in self._holding_area_inventory
         ):
             self._holding_area_inventory.clear()
         else:
-            del self._holding_area_inventory[holding_areaID]
+            del self._holding_area_inventory[holding_area_id]
 
     def get_holding_area_inventory(self) -> Dict[int, "HoldingArea"]:
         """
@@ -583,7 +583,7 @@ class Room(HistoryClass):
             Dict[int, HoldingArea]:
                 Dictionary of holding areas that are contained in room.
         """
-        if IDClass.get_verbosity() > 0:
+        if IDObject.get_verbosity() > 0:
             if not self._holding_area_inventory:
                 print("Inventory is empty.")
             else:
@@ -593,7 +593,7 @@ class Room(HistoryClass):
 
 
 @dataclass
-class HoldingArea(HistoryClass):
+class HoldingArea(HistoryObject):
     """
     A class that describes a holding area for containers.
     Each holding area may contain one container.
@@ -708,7 +708,7 @@ class HoldingArea(HistoryClass):
             container (Container): Container to be added to holding area.
         """
         if self.get_occupation_status() is True:
-            if IDClass.get_verbosity() > 0:
+            if IDObject.get_verbosity() > 0:
                 print("Holding Area is already occupied.")
         else:
             # Set new location to added container
@@ -727,7 +727,7 @@ class HoldingArea(HistoryClass):
         """
         Removes container from holding area.
         """
-        if IDClass.get_verbosity() > 0:
+        if IDObject.get_verbosity() > 0:
             for id, container in self._container_inventory.items():
                 print(
                     f"""ID: {id}, Container: {container}
@@ -745,11 +745,11 @@ class HoldingArea(HistoryClass):
                 Container that is contained in holding area.
         """
         if self._occupation_status is False:
-            if IDClass.get_verbosity() > 0:
+            if IDObject.get_verbosity() > 0:
                 print("No container in holding area.")
         else:
             for id, container in self._container_inventory.items():
-                if IDClass.get_verbosity() > 0:
+                if IDObject.get_verbosity() > 0:
                     print(f"Container: {container.get_name()}, ID: {id}")
                 return container
 
@@ -774,7 +774,7 @@ class HoldingArea(HistoryClass):
 
 
 @dataclass
-class Container(HistoryClass):
+class Container(HistoryObject):
     """
     A class that describes a container for nuclear material.
 
@@ -1005,26 +1005,26 @@ class Location:
                 f"ID: {self.get_room().get_id()}"
             )
         if self.get_holding_area() is not None:
-            hAN = self.get_holding_area().get_name()
-            hAID = self.get_holding_area().get_id()
-            print(f"Holding Area: {hAN}, ID: {hAID}")
+            h_a_n = self.get_holding_area().get_name()
+            h_a_id = self.get_holding_area().get_id()
+            print(f"Holding Area: {h_a_n}, ID: {h_a_id}")
 
 
 @dataclass
-class Command(IDClass):
+class Command(IDObject):
     """
     The base class for all instances that specify commands.
     All commands are to be directed to the Commander.
 
     Attributes:
         _type (str): Type of command.
-        _target (HistoryClass): Instance that is targeted by command.
+        _target (HistoryObject): Instance that is targeted by command.
     """
 
     _type: str
-    _target: HistoryClass
+    _target: HistoryObject
 
-    def __init__(self, type: str, target: HistoryClass):
+    def __init__(self, type: str, target: HistoryObject):
         super().__init__()
         self.set_type(type)
         self.set_target(target)
@@ -1047,21 +1047,21 @@ class Command(IDClass):
         """
         return str(self._type)
 
-    def set_target(self, target: HistoryClass) -> None:
+    def set_target(self, target: HistoryObject) -> None:
         """
         Set instance targeted with a command.
 
         Args:
-                target (HistoryClass): Targeted instance.
+                target (HistoryObject): Targeted instance.
         """
-        self._target: HistoryClass = target
+        self._target: HistoryObject = target
 
-    def get_target(self) -> HistoryClass:
+    def get_target(self) -> HistoryObject:
         """
         Gets instance targeted with a command.
 
         Returns:
-                HistoryClass: Targeted instance.
+                HistoryObject: Targeted instance.
         """
         return self._target
 
@@ -1072,17 +1072,17 @@ class TransportCmd(Command):
     A class that specifies a transport command from an origin to a destination.
 
     Attributes:
-        target (HistoryClass): Instance that is targeted by command.
+        target (HistoryObject): Instance that is targeted by command.
         origin (Location): Origin of transport.
         destination (Location): Destination of transport.
     """
 
-    _target: HistoryClass
+    _target: HistoryObject
     _origin: Location
     _destination: Location
 
     def __init__(
-        self, target: HistoryClass, origin: Location, destination: Location
+        self, target: HistoryObject, origin: Location, destination: Location
     ):
         super().__init__("transport", target)
         self.set_origin(origin)
