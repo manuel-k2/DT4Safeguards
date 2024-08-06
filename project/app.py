@@ -12,9 +12,6 @@ builder.build_model(model)
 container_1: Container = MonitoringSystem.get_instance(id=3)
 holding_area_destination: HoldingArea = MonitoringSystem.get_instance(id=10)
 
-# print("\nLocation - Container 1 (PreTransport): ")
-# print(container_1.get_location())
-
 # Move container by sending Transport sepecifications to Commander
 target = container_1
 origin = container_1.get_location()
@@ -28,12 +25,6 @@ commander.issue_transport_command(
     target, origin, destination, start_time, end_time
 )
 
-# Print new container location and history
-# print("\nLocation - Container 1 (PostTransport)")
-# print(container_1.get_location())
-# print("\nHistory - Container 1")
-# print(container_1.get_history())
-
 # Print facility histories
 facility_1: Facility = MonitoringSystem.get_instance(id=0)
 print("Current History - Facility 1")
@@ -41,10 +32,6 @@ print(facility_1.get_history())
 
 print("Initial History - Facility 1")
 print(facility_1.get_history_at_time("2024:01:01.00:00"))
-
-# facility_2: Facility = MonitoringSystem.get_instance(id=7)
-# print("History - Facility 2")
-# print(facility_2.get_history())
 
 # Display current state of model and export it to JSON file
 model_update = builder.get_model()

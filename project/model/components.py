@@ -37,15 +37,12 @@ class MonitoringSystem:
             of IDObject, indexed by integer IDs.
         _id_counter (int): Class-level counter to generate unique IDs.
         _global_time (datetime): Class-level global time in datetime format.
-        _current_model (Dict[str, Dict]):
-            Class-level dictionary to store current state of model.
         _verbosity (int): Class-level verbosity setting.
     """
 
     _registry: ClassVar[Dict[int, "IDObject"]] = {}
     _id_counter: ClassVar[int] = 0
     _global_time: ClassVar[datetime] = datetime(2024, 1, 1, 0, 0)
-    _current_model: ClassVar[Dict[str, Dict]] = field(default_factory=dict)
     _verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
 
     @classmethod
@@ -136,7 +133,7 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
 
         if cls.get_verbosity() > 0:
-            print(f"Retrieved instances of type {class_type.__name__}: ")
+            print(f"Retrieved instances: ")
             for id, instance in instance_inventory.items():
                 print(f"ID: {id}, Type: {type(instance).__name__}")
 
@@ -1464,12 +1461,14 @@ class Commander:
         end_time: str,
     ) -> None:
         """
-        Creates transport command instance and sends it to target container.
+        Creates TransportCmd instance and sends it to target container.
 
         Args:
             target (Container): Targeted container instance.
             origin (Location): Origin of transport.
             destination (Location): Destination of transport.
+            start_time (str): Start time in the format YYYY:MM:DD.hh:mm.
+            end_time (str): End time in the format YYYY:MM:DD.hh:mm.
         """
         # Check that origin Location matches current position of target
         if origin.get_facility() is not target.get_location().get_facility():
