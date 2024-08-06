@@ -36,8 +36,11 @@ commander.issue_transport_command(
 
 # Print facility histories
 facility_1: Facility = MonitoringSystem.get_instance(id=0)
-print("History - Facility 1")
+print("Current History - Facility 1")
 print(facility_1.get_history())
+
+print("Initial History - Facility 1")
+print(facility_1.get_history_at_time("2024:01:01.00:00"))
 
 # facility_2: Facility = MonitoringSystem.get_instance(id=7)
 # print("History - Facility 2")
