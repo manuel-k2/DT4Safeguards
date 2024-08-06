@@ -42,18 +42,10 @@ class MonitoringSystem:
         _verbosity (int): Class-level verbosity setting.
     """
 
-    _registry: ClassVar[Dict[int, "IDObject"]] = (
-        {}
-    )
-    _id_counter: ClassVar[int] = (
-        0 
-    )
-    _global_time: ClassVar[datetime] = datetime(
-        2024, 1, 1, 0, 0
-    )
-    _current_model: ClassVar[Dict[str, Dict]] = field(
-        default_factory=dict
-    )
+    _registry: ClassVar[Dict[int, "IDObject"]] = {}
+    _id_counter: ClassVar[int] = 0
+    _global_time: ClassVar[datetime] = datetime(2024, 1, 1, 0, 0)
+    _current_model: ClassVar[Dict[str, Dict]] = field(default_factory=dict)
     _verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
 
     @classmethod
@@ -113,7 +105,10 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
         instance = cls._registry[id]
         if cls.get_verbosity() > 0:
-            print(f"Retrieved instance with ID: {id}, Type: {type(instance).__name__}")
+            print(
+                f"Retrieved instance with ID: {id}, "
+                f"Type: {type(instance).__name__}"
+            )
         return instance
 
     @classmethod
@@ -364,7 +359,7 @@ class HistoryObject(IDObject):
             History: History instance of HistoryObject instance.
         """
         return self._history
-    
+
     def get_history_at_time(self, time: str) -> "History":
         """
         Gets history instance of HistoryObject instance
@@ -422,17 +417,16 @@ class History:
                     f"""End: {command["end_time"]}.\n"""
                 )
             return return_str
-    
+
     def get_entries(self) -> Dict[int, dict]:
         """
         Get entries of History instance's dictionary.
 
         Returns:
             Dict[int, dict]: Dictionary with command specifications.
-        
+
         """
         return copy(self._entries)
-
 
     def update_history(self, cmd: "Command") -> None:
         """
@@ -797,7 +791,10 @@ class Room(HistoryObject):
                 print("Holdingg area inventory is empty.")
             else:
                 for id, holding_area in self._holding_area_inventory.items():
-                    print(f"ID: {id}, Type: Holding area, Name: {holding_area.get_name()}")
+                    print(
+                        f"ID: {id}, Type: Holding area, "
+                        f"Name: {holding_area.get_name()}"
+                    )
         return copy(self._holding_area_inventory)
 
 
@@ -1169,7 +1166,6 @@ class Location:
         return_str = (
             f"ID: {self.get_facility().get_id()}, Type: Facility, "
             f"Name: {self.get_facility().get_name()}"
-
         )
         if self._room is not None:
             return_str += (
@@ -1181,9 +1177,7 @@ class Location:
         if self._holding_area is not None:
             h_a_id = self.get_holding_area().get_id()
             h_a_n = self.get_holding_area().get_name()
-            return_str += (
-                f"\nID: {h_a_id}, Typ: HoldingArea, Name: {h_a_n})"
-            )
+            return_str += f"\nID: {h_a_id}, Typ: HoldingArea, Name: {h_a_n})"
         else:
             return_str += "\nNone"
 
@@ -1391,7 +1385,7 @@ class TransportCmd(Command):
         super().__init__("transport", target, start_time, end_time)
         self.set_origin(origin)
         self.set_destination(destination)
-    
+
     def __repr__(self) -> str:
         """
         Provides a string representation of the Command instance.
@@ -1399,13 +1393,11 @@ class TransportCmd(Command):
         Returns:
             str: String representation of the Command instance.
         """
-        return (
-            f"""Transport command with target: {self.get_target()}
+        return f"""Transport command with target: {self.get_target()}
             Origin: {self.get_origin()}
             Destination: {self.get_destination()}
             Start time: {self.get_start_time()}
             End time: {self.get_end_time()}"""
-        )
 
     def set_origin(self, origin: Location) -> None:
         """
