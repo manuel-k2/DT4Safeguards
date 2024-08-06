@@ -107,7 +107,7 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
         instance = cls._registry[id]
         if cls.get_verbosity() > 0:
-            print(f"Retrieved instance with ID {id} type: {type(instance)}")
+            print(f"Retrieved instance with ID: {id}, Type: {type(instance).__name__}")
         return instance
 
     @classmethod
@@ -135,9 +135,9 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
 
         if cls.get_verbosity() > 0:
-            print(f"Instances of type {class_type.__name__}: ")
+            print(f"Retrieved instances of type {class_type.__name__}: ")
             for id, instance in instance_inventory.items():
-                print(f"ID: {id}, {type(instance)}")
+                print(f"ID: {id}, Type: {type(instance).__name__}")
 
         return instance_inventory
 
@@ -150,7 +150,7 @@ class MonitoringSystem:
             print("None.")
         else:
             for id, instance in cls._registry.items():
-                print(f"ID: {id}, {type(instance)}")
+                print(f"ID: {id}, Type: {type(instance).__name__}")
 
     @classmethod
     def get_time(cls) -> str:
@@ -594,10 +594,10 @@ class Facility(HistoryObject):
         """
         if IDObject.get_verbosity() > 0:
             if not self._room_inventory:
-                print("Inventory is empty.")
+                print("Room inventory is empty.")
             else:
                 for id, room in self._room_inventory.items():
-                    print(f"ID: {id}, Room: {room.get_name()}")
+                    print(f"ID: {id}, Type: Room, Name: {room.get_name()}")
         return copy(self._room_inventory)
 
 
@@ -788,10 +788,10 @@ class Room(HistoryObject):
         """
         if IDObject.get_verbosity() > 0:
             if not self._holding_area_inventory:
-                print("Inventory is empty.")
+                print("Holdingg area inventory is empty.")
             else:
                 for id, holding_area in self._holding_area_inventory.items():
-                    print(f"Holding area: {holding_area.get_name()}, ID: {id}")
+                    print(f"ID: {id}, Type: Holding area, Name: {holding_area.get_name()}")
         return copy(self._holding_area_inventory)
 
 
