@@ -966,7 +966,10 @@ class HoldingArea(HistoryObject):
         else:
             for id, container in self._container_inventory.items():
                 if IDObject.get_verbosity() > 0:
-                    print(f"Container: {container.get_name()}, ID: {id}")
+                    print(
+                        f"ID: {id}, Type: Container, "
+                        f"Name: {container.get_name()}"
+                    )
                 return container
 
     def _activation(self, cmd: "Command") -> None:
