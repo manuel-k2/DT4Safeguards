@@ -36,18 +36,24 @@ class MonitoringSystem:
             Class-level dictionary to store instances
             of IDObject, indexed by integer IDs.
         _id_counter (int): Class-level counter to generate unique IDs.
+        _global_time (datetime): Class-level global time in datetime format.
+        _current_model (Dict[str, Dict]):
+            Class-level dictionary to store current state of model.
         _verbosity (int): Class-level verbosity setting.
     """
 
     _registry: ClassVar[Dict[int, "IDObject"]] = (
         {}
-    )  # Class-level dictionary to store indexed instances of IDObject.
+    )
     _id_counter: ClassVar[int] = (
-        0  # Class-level counter to generate unique IDs.
+        0 
     )
     _global_time: ClassVar[datetime] = datetime(
         2024, 1, 1, 0, 0
-    )  # Initialize global time to a specific start date and time.
+    )
+    _current_model: ClassVar[Dict[str, Dict]] = field(
+        default_factory=dict
+    )
     _verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
 
     @classmethod
@@ -1157,15 +1163,26 @@ class Location:
         Returns:
             str: String representation of the Location instance.
         """
-        return_str = f"({self.get_facility().get_name()}, "
+        return_str = (
+            f"ID: {self.get_facility().get_id()}, Type: Facility, "
+            f"Name: {self.get_facility().get_name()}"
+
+        )
         if self._room is not None:
-            return_str += f"{self.get_room().get_name()}, "
+            return_str += (
+                f"\nID: {self.get_room().get_id()}, Typ: Room, "
+                f"Name: {self.get_room().get_name()}"
+            )
         else:
-            return_str += "None, "
+            return_str += "\nNone"
         if self._holding_area is not None:
-            return_str += f"{self.get_holding_area().get_name()})"
+            h_a_id = self.get_holding_area().get_id()
+            h_a_n = self.get_holding_area().get_name()
+            return_str += (
+                f"\nID: {h_a_id}, Typ: HoldingArea, Name: {h_a_n})"
+            )
         else:
-            return_str += "None, "
+            return_str += "\nNone"
 
         return return_str
 
@@ -1222,25 +1239,6 @@ class Location:
                 HodingArea: Holding area instance.
         """
         return self._holding_area
-
-    def print_location(self) -> None:
-        """
-        Prints facility and room IDs of location.
-        """
-        if self.get_facility / () is not None:
-            print(
-                f"Facility: {self.get_facility().get_name()}, "
-                f"ID: {self.get_facility().get_id()}"
-            )
-        if self.get_room() is not None:
-            print(
-                f"Room: {self.get_room().get_name()}, "
-                f"ID: {self.get_room().get_id()}"
-            )
-        if self.get_holding_area() is not None:
-            h_a_n = self.get_holding_area().get_name()
-            h_a_id = self.get_holding_area().get_id()
-            print(f"Holding Area: {h_a_n}, ID: {h_a_id}")
 
 
 @dataclass
@@ -1390,6 +1388,21 @@ class TransportCmd(Command):
         super().__init__("transport", target, start_time, end_time)
         self.set_origin(origin)
         self.set_destination(destination)
+    
+    def __repr__(self) -> str:
+        """
+        Provides a string representation of the Command instance.
+
+        Returns:
+            str: String representation of the Command instance.
+        """
+        return (
+            f"""Transport command with target: {self.get_target()}
+            Origin: {self.get_origin()}
+            Destination: {self.get_destination()}
+            Start time: {self.get_start_time()}
+            End time: {self.get_end_time()}"""
+        )
 
     def set_origin(self, origin: Location) -> None:
         """
@@ -1426,18 +1439,6 @@ class TransportCmd(Command):
                 Location: Destination of transport.
         """
         return self._destination
-
-    def print_command(self) -> None:
-        """
-        Prints details of transport command.
-        """
-        print(f"Transport command with target: {self.get_target()}")
-        print("Origin:")
-        self.get_origin().print_location()
-        print("Destination:")
-        self.get_destination().print_location()
-        print("Start time:", self.get_start_time())
-        print("End time:", self.get_end_time())
 
 
 class Commander:

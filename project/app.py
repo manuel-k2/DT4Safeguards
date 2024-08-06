@@ -13,7 +13,7 @@ container_1: Container = MonitoringSystem.get_instance(id=3)
 holding_area_destination: HoldingArea = MonitoringSystem.get_instance(id=10)
 
 # print("\nLocation - Container 1 (PreTransport): ")
-# container_1.get_location().print_location()
+# print(container_1.get_location())
 
 # Move container by sending Transport sepecifications to Commander
 target = container_1
@@ -30,7 +30,7 @@ commander.issue_transport_command(
 
 # Print new container location and history
 # print("\nLocation - Container 1 (PostTransport)")
-# container_1.get_location().print_location()
+# print(container_1.get_location())
 # print("\nHistory - Container 1")
 # print(container_1.get_history())
 
