@@ -1,7 +1,9 @@
 from dataclasses import dataclass, field
 from typing import ClassVar, Dict
+from datetime import datetime, timedelta
 from contextlib import contextmanager
 from copy import copy
+
 import json
 
 from model.units import Dimensions, Position
@@ -11,6 +13,15 @@ class InstanceNotFoundError(Exception):
     """
     Exception raised when an instance with a
     given ID or given class name is not found.
+    """
+
+    pass
+
+
+class InvalidStartTimeError(Exception):
+    """
+    Exception raised when the start time
+    is before the current global time.
     """
 
     pass
@@ -28,9 +39,16 @@ class MonitoringSystem:
         _verbosity (int): Class-level verbosity setting.
     """
 
-    _registry: ClassVar[Dict[int, "IDObject"]] = {}
-    _id_counter: ClassVar[int] = 0
-    _verbosity: ClassVar[int] = 0  # 0: Silent, 1: Verbose
+    _registry: ClassVar[Dict[int, "IDObject"]] = (
+        {}
+    )  # Class-level dictionary to store indexed instances of IDObject.
+    _id_counter: ClassVar[int] = (
+        0  # Class-level counter to generate unique IDs.
+    )
+    _global_time: ClassVar[datetime] = datetime(
+        2024, 1, 1, 0, 0
+    )  # Initialize global time to a specific start date and time.
+    _verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
 
     @classmethod
     def set_verbosity(cls, level: int) -> None:
@@ -89,11 +107,11 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
         instance = cls._registry[id]
         if cls.get_verbosity() > 0:
-            print(f"Retrieved instance with ID {id}: {instance}")
+            print(f"Retrieved instance with ID {id} type: {type(instance)}")
         return instance
 
     @classmethod
-    def get_instace_by_type(cls, class_type: type) -> Dict[int, "IDObject"]:
+    def get_instance_by_type(cls, class_type: type) -> Dict[int, "IDObject"]:
         """
         Retrieves a list of all instances from the registry
         that match the given class type.
@@ -119,7 +137,7 @@ class MonitoringSystem:
         if cls.get_verbosity() > 0:
             print(f"Instances of type {class_type.__name__}: ")
             for id, instance in instance_inventory.items():
-                print(f"ID: {id}, Instance: {instance}")
+                print(f"ID: {id}, {type(instance)}")
 
         return instance_inventory
 
@@ -129,10 +147,102 @@ class MonitoringSystem:
         Displays all instances in the registry.
         """
         if not cls._registry:
-            print("Registry is empty.")
+            print("None.")
         else:
             for id, instance in cls._registry.items():
-                print(f"ID: {id}, Instance: {instance}")
+                print(f"ID: {id}, {type(instance)}")
+
+    @classmethod
+    def get_time(cls) -> str:
+        """
+        Gets current global time in the format YYYY:MM:DD.hh:mm.
+
+        Returns:
+            str: Current global time.
+        """
+        if cls.get_verbosity() > 0:
+            print("Global time: ", cls._global_time.strftime("%Y:%m:%d.%H:%M"))
+
+        return cls._global_time.strftime("%Y:%m:%d.%H:%M")
+
+    @classmethod
+    def set_time(cls, new_time: datetime) -> None:
+        """
+        Sets global time to a new value.
+
+        Args:
+            new_time (datetime): New global time.
+        """
+        cls._global_time = new_time
+
+    @classmethod
+    def process_time(cls, start_time: str, end_time: str) -> None:
+        """
+        Processes start and end times, updates global time if necessary,
+        calculates the duration.
+
+        Args:
+            start_time (str): Start time in the format YYYY:MM:DD.hh:mm.
+            end_time (str): End time in the format YYYY:MM:DD.hh:mm.
+
+        Returns:
+            int: Duration between the start and end times in minutes.
+        """
+        # Parse start and end times
+        start_dt = datetime.strptime(start_time, "%Y:%m:%d.%H:%M")
+        end_dt = datetime.strptime(end_time, "%Y:%m:%d.%H:%M")
+
+        current_dt = cls._global_time
+
+        # Check if start time is before current global time
+        if start_dt < current_dt:
+            duration_before_current_time = int(
+                (current_dt - start_dt).total_seconds() / 60
+            )  # Duration in minutes
+                
+            if cls.get_verbosity() > 0:
+                print(
+                    f"""Warning: Start time is {duration_before_current_time}
+                    min before current global time."""
+                )
+
+        # Update global time if start time is later than current global time
+        if start_dt > current_dt:
+            cls.set_time(start_dt)
+
+            if cls.get_verbosity() > 0:
+                print(f"""Global time is now: {start_time}""")
+
+        # Calculate duration
+        duration_total = int(
+            (end_dt - start_dt).total_seconds() / 60
+        ) # Duration in minutes
+
+        if start_dt < current_dt:
+            duration = duration_total - duration_before_current_time
+        else:
+            duration = duration_total
+        
+        # Increment global time by duration
+        cls.increment_time(duration)
+
+        if cls.get_verbosity() > 0:
+            print(
+                f"""Process duration: {duration} minutes."""
+                f"""\nGlobal time is now: {cls.get_time()}"""
+            )
+
+    @classmethod
+    def increment_time(cls, amount: int = 1) -> None:
+        """
+        Increments the global time by a specified amount.
+
+        Args:
+            amount (int):
+                Amount of time to increment by in minutes.
+                Default is 1 minute.
+        """
+        cls._global_time += timedelta(minutes=amount)
 
 
 @dataclass
@@ -143,11 +253,14 @@ class IDObject:
 
     Attributes:
         _id (int): The unique identifier for the instance.
+        _init_time (str):
+            Global time at the moment of instance initialization.
         _verbosity (int): Class-level verbosity setting.
     """
 
-    _id: int = field(init=False)
-    _verbosity: ClassVar[int] = 0  # 0: Silent, 1: Verbose
+    _id: int = field(init=False) # ID of IDObject instance
+    _init_time: str = field(init=False) # Initialization time of IDObject instance
+    _verbosity: ClassVar[int] = 1 # 0: Silent, 1: Verbose
 
     @classmethod
     def set_verbosity(cls, level: int) -> None:
@@ -175,6 +288,7 @@ class IDObject:
         and assigns a unique ID.
         """
         self._id = MonitoringSystem.register(self)
+        self._init_time = MonitoringSystem.get_time()
 
     def get_id(self) -> int:
         """
@@ -185,23 +299,26 @@ class IDObject:
         """
         return int(self._id)
 
-
+@dataclass
 class HistoryObject(IDObject):
     """
     The base class for all instances that come with a history that
     tracks all changes made to the instance.
 
     Attributes:
-        _history (Dict[int, dict]): Dictionary to store command
-            specifications.
+        _history (History): History instance.
     """
 
-    _history: Dict[int, dict] = {}
+    _history: 'History'
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
+    
+    def __post_init__(self) -> None:
+        super().__post_init__()
+        self._history = History()
 
-    def activation(self, cmd: "Command", caller: "Commander") -> None:
+    def activation(self, cmd: 'Command', caller: 'Commander') -> None:
         """
         Public activation function that ensures caller's identity before
         before calling private activation function.
@@ -218,7 +335,7 @@ class HistoryObject(IDObject):
             )
         self._activation(cmd)
 
-    def _activation(self, cmd: "Command") -> None:
+    def _activation(self, cmd: 'Command') -> None:
         """
         Registers a command passed to this instance and
         activates certain functions based on the command type.
@@ -226,21 +343,9 @@ class HistoryObject(IDObject):
         Args:
             cmd (Command): Instance of command to be processed.
         """
-        self.update_history(cmd)
+        self._history.update_history(cmd)
 
-    def update_history(self, cmd: "Command") -> None:
-        """
-        Stores command specifications in a dictionary.
-
-        Args:
-            cmd (Command): Instance of command to be processed.
-        """
-        self._history[cmd.get_id()] = {
-            "cmdType": cmd.get_type(),
-            "target": cmd.get_target(),
-        }
-
-    def get_history(self) -> Dict[int, dict]:
+    def get_history(self) -> 'History':
         """
         Gets history of instance.
 
@@ -249,15 +354,54 @@ class HistoryObject(IDObject):
         """
         return copy(self._history)
 
-    def print_history(self) -> None:
+
+@dataclass
+class History:
+    """
+    History class that tracks all changes made to
+    an associated instance.
+
+    Attributes:
+        _history (Dict[int, dict]): Dictionary to store command
+            specifications.
+    """
+
+    _history: Dict[int, dict] = field(default_factory=dict)
+
+    def __repr__(self) -> str:
         """
-        Prints history of instance.
+        Provides a string representation of the History instance.
+
+        Returns:
+            str: String representation of the History instance.
         """
         if not self._history:
-            print("Registry is empty.")
+            return ("Registry is empty.")
         else:
+            return_str = ""
             for id, instance in self._history.items():
-                print(f"Command with ID: {id}, {instance}")
+                return_str += (
+                    f"Command ID: {id}, "
+                    f"Type: {instance["cmd_type"]}, "
+                    f"Target: {instance["target"].get_name()}, "
+                    f"Start: {instance["start_time"]}, "
+                    f"End: {instance["end_time"]}.\n"
+                )
+            return return_str
+
+    def update_history(self, cmd: 'Command') -> None:
+        """
+        Stores command specifications in a dictionary.
+
+        Args:
+            cmd (Command): Instance of command to be processed.
+        """
+        self._history[cmd.get_id()] = {
+            "cmd_type": cmd.get_type(),
+            "target": cmd.get_target(),
+            "start_time": cmd.get_start_time(),
+            "end_time": cmd.get_end_time(),
+        }
 
 
 @dataclass
@@ -283,6 +427,15 @@ class Facility(HistoryObject):
     def __init__(
         self, type: str, name: str, dimensions: Dimensions, position: Position
     ):
+        """
+        Initializes Facility instance.
+
+        Args:
+            type (str): Type of facility.
+            name (str): Name of facility.
+            dimensions (Dimensions): Dimensions of facility.
+            position (Position): Position of faility.
+        """
         super().__init__()
         self.set_type(type)
         self.set_name(name)
@@ -436,6 +589,15 @@ class Room(HistoryObject):
     def __init__(
         self, type: str, name: str, dimensions: Dimensions, position: Position
     ):
+        """"
+        Initializes Room instance.
+        
+        Args:
+            type (str): Type of room.
+            name (str): Name of room.
+            dimensions (Dimensions): Dimensions of room.
+            position (Position): Position of room.
+        """
         super().__init__()
         self.set_type(type)
         self.set_name(name)
@@ -566,7 +728,9 @@ class Room(HistoryObject):
                 ID of holding area to be removed from inventory.
         """
         if holding_area_id not in self._holding_area_inventory:
-            raise KeyError(f"Holding area with ID {holding_area_id} not found.")
+            raise KeyError(
+                f"Holding area with ID {holding_area_id} not found."
+            )
         if (
             len(self._holding_area_inventory) == 1
             and holding_area_id in self._holding_area_inventory
@@ -614,6 +778,13 @@ class HoldingArea(HistoryObject):
     _container_inventory: Dict[int, "Container"] = field(default_factory=dict)
 
     def __init__(self, name: str, position: Position):
+        """"
+        Initializes HoldingArea instance.
+        
+        Args:
+            name (str): Name of holding area.
+            position (Position): Position of holding area.
+        """
         super().__init__()
         self.set_name(name)
         self.set_occupation_status(False)
@@ -753,7 +924,7 @@ class HoldingArea(HistoryObject):
                     print(f"Container: {container.get_name()}, ID: {id}")
                 return container
 
-    def _activation(self, cmd: "Command") -> None:
+    def _activation(self, cmd: 'Command') -> None:
         """
         Registers a command passed to this instance and
         activates certain functions based on the command type.
@@ -770,7 +941,7 @@ class HoldingArea(HistoryObject):
                 self.add_container(cmd.get_target())
 
         # Update own history
-        super().update_history(cmd)
+        super()._activation(cmd)
 
 
 @dataclass
@@ -792,6 +963,14 @@ class Container(HistoryObject):
     _location: "Location" = None
 
     def __init__(self, type: str, name: str, dimensions: Dimensions):
+        """"
+        Initializes Container instance.
+        
+        Args:
+            type (str): Type of container.
+            name (str): Name of container.
+            dimensions (Dimensions): Dimensions of container.
+        """
         super().__init__()
         self.set_type(type)
         self.set_name(name)
@@ -877,7 +1056,7 @@ class Container(HistoryObject):
         """
         return copy(self._location)
 
-    def _activation(self, cmd: "Command") -> None:
+    def _activation(self, cmd: 'Command') -> None:
         """
         Registers a command passed to this instance and
         activates certain functions based on the command type.
@@ -890,7 +1069,7 @@ class Container(HistoryObject):
             self.set_location(cmd.get_destination())
 
         # Update own history
-        super().update_history(cmd)
+        super()._activation(cmd)
 
 
 @dataclass
@@ -900,7 +1079,7 @@ class Location:
     based on facility, room and holding area.
 
     Attributes:
-        _facility (Facility): Corresponding   facility instance.
+        _facility (Facility): Corresponding facility instance.
         _room (Room): Corresponding room instance.
         _holding_area (HoldingArea): Corresponding holding area instance.
     """
@@ -910,6 +1089,15 @@ class Location:
     _holding_area: HoldingArea
 
     def __init__(self, *args):
+        """"
+        Initializes Location instance.
+        
+        Args:
+            facility (Facility): Corresponding facility instance.
+            room (Room): Corresponding room instance (optional).
+            holding_area (HoldingArea):
+                Corresponding holding area instance (optional).
+        """
         if len(args) > 0:
             self.set_facility(args[0])
         else:
@@ -930,11 +1118,17 @@ class Location:
         Returns:
             str: String representation of the Location instance.
         """
-        return (
-            f"({self.get_facility().get_name()}, "
-            f"{self.get_room().get_name()}, "
-            f"{self.get_holding_area().get_name()})"
-        )
+        return_str = f"({self.get_facility().get_name()}, "
+        if self._room is not None:
+            return_str += f"{self.get_room().get_name()}, "
+        else:
+            return_str += "None, "
+        if self._holding_area is not None:
+            return_str += f"{self.get_holding_area().get_name()})"
+        else:
+            return_str += "None, "
+        
+        return return_str
 
     def set_facility(self, facility: Facility) -> None:
         """
@@ -1019,16 +1213,34 @@ class Command(IDObject):
     Attributes:
         _type (str): Type of command.
         _target (HistoryObject): Instance that is targeted by command.
+        _start_time (str): Start time in the format YYYY:MM:DD.hh:mm.
+        _end_time (str): End time in the format YYYY:MM:DD.hh:mm.
     """
 
     _type: str
     _target: HistoryObject
+    _start_time: str
+    _end_time: str
 
-    def __init__(self, type: str, target: HistoryObject):
+    def __init__(
+        self, type: str, target: HistoryObject, start_time: str, end_time: str
+    ):
+        """"
+        Initializes Command instance.
+        
+        Args:
+            type (str): Type of command.
+            target (HistoryObject): Instance that is targeted by command.
+            start_time (str): Start time in the format YYYY:MM:DD.hh:mm.
+            end_time (str): End time in the format YYYY:MM:DD.hh:mm.
+        """
         super().__init__()
         self.set_type(type)
         self.set_target(target)
-
+        self.set_start_time(start_time)
+        self.set_end_time(end_time)
+        MonitoringSystem.process_time(start_time, end_time)
+    
     def set_type(self, type: str) -> None:
         """
         Sets command type.
@@ -1065,6 +1277,44 @@ class Command(IDObject):
         """
         return self._target
 
+    def set_start_time(self, start_time: str) -> None:
+        """
+        Sets the start time.
+
+        Args:
+            _start_time (str):
+                Start time in the format YYYY:MM:DD.hh:mm.
+        """
+        self._start_time = start_time
+
+    def get_start_time(self) -> str:
+        """
+        Gets the start time.
+
+        Returns:
+            str: Start time in the format YYYY:MM:DD.hh:mm.
+        """
+        return str(self._start_time)
+
+    def set_end_time(self, end_time: str) -> None:
+        """
+        Sets the end time.
+
+        Args:
+            _end_time (str):
+                End time in the format YYYY:MM:DD.hh:mm.
+        """
+        self._end_time = end_time
+
+    def get_end_time(self) -> str:
+        """
+        Gets the end time.
+
+        Returns:
+            str: End time in the format YYYY:MM:DD.hh:mm.
+        """
+        return str(self._end_time)
+
 
 @dataclass
 class TransportCmd(Command):
@@ -1072,19 +1322,33 @@ class TransportCmd(Command):
     A class that specifies a transport command from an origin to a destination.
 
     Attributes:
-        target (HistoryObject): Instance that is targeted by command.
-        origin (Location): Origin of transport.
-        destination (Location): Destination of transport.
+        _origin (Location): Origin of transport.
+        _destination (Location): Destination of transport.
     """
 
-    _target: HistoryObject
     _origin: Location
     _destination: Location
 
     def __init__(
-        self, target: HistoryObject, origin: Location, destination: Location
+        self,
+        target: HistoryObject,
+        origin: Location,
+        destination: Location,
+        start_time: str,
+        end_time: str,
     ):
-        super().__init__("transport", target)
+        """"
+        Initializes TransportCmd instance.
+        
+        Args:
+            type (str): Type of command.
+            target (HistoryObject): Instance that is targeted by command.
+            origin (Location): Origin of transport.
+            destination (Location): Destination of transport.
+            start_time (str): Start time in the format YYYY:MM:DD.hh:mm.
+            end_time (str): End time in the format YYYY:MM:DD.hh:mm.
+        """
+        super().__init__("transport", target, start_time, end_time)
         self.set_origin(origin)
         self.set_destination(destination)
 
@@ -1104,7 +1368,7 @@ class TransportCmd(Command):
         Returns:
                 Location: Origin of transport.
         """
-        return copy(self._origin)
+        return self._origin
 
     def set_destination(self, destination: Location) -> None:
         """
@@ -1122,7 +1386,7 @@ class TransportCmd(Command):
         Returns:
                 Location: Destination of transport.
         """
-        return copy(self._destination)
+        return self._destination
 
     def print_command(self) -> None:
         """
@@ -1133,6 +1397,8 @@ class TransportCmd(Command):
         self.get_origin().print_location()
         print("Destination:")
         self.get_destination().print_location()
+        print("Start time:", self.get_start_time())
+        print("End time:", self.get_end_time())
 
 
 class Commander:
@@ -1144,6 +1410,9 @@ class Commander:
 
     @contextmanager
     def _authorize(self):
+        """
+        Authorizes Commander instance ro activate other instances.
+        """
         old_commander = Commander._authorized_commander
         Commander._authorized_commander = self
         try:
@@ -1152,7 +1421,12 @@ class Commander:
             Commander._authorized_commander = old_commander
 
     def issue_transport_command(
-        self, target: Container, origin: Location, destination: Location
+        self,
+        target: Container,
+        origin: Location,
+        destination: Location,
+        start_time: str,
+        end_time: str
     ) -> None:
         """
         Creates transport command instance and sends it to target container.
@@ -1188,7 +1462,9 @@ class Commander:
             raise KeyError("Destination Holding area must not be NoneType.")
         else:
             # Create Command
-            cmd = TransportCmd(target, origin, destination)
+            cmd = TransportCmd(
+                target, origin, destination, start_time, end_time
+            )
 
             with self._authorize():
                 # Activate components at origin of transport
@@ -1335,7 +1611,7 @@ class Builder:
 
         # Get facilities from registry and write stats into dictionary
         faciliy_inventory: Dict[int, Facility] = (
-            MonitoringSystem.get_instace_by_type(Facility)
+            MonitoringSystem.get_instance_by_type(Facility)
         )
         i: int = 1
         for _id, facility in faciliy_inventory.items():

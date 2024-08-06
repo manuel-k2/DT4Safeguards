@@ -20,24 +20,28 @@ target = container_1
 origin = container_1.get_location()
 destination = holding_area_destination.get_location()
 destination.set_holding_area(holding_area_destination)
+start_time = "2024:08:06.13:12"
+end_time = "2024:08:06.14:19"
 
 commander = Commander()
-commander.issue_transport_command(target, origin, destination)
+commander.issue_transport_command(
+    target, origin, destination, start_time, end_time
+)
 
 # Print new container location and history
 # print("\nLocation - Container 1 (PostTransport)")
 # container_1.get_location().print_location()
 # print("\nHistory - Container 1")
-# container_1.print_history()
+# print(container_1.get_history())
 
 # Print facility histories
 facility_1: Facility = MonitoringSystem.get_instance(id=0)
 print("History - Facility 1")
-facility_1.print_history()
+print(facility_1.get_history())
 
 # facility_2: Facility = MonitoringSystem.get_instance(id=7)
 # print("History - Facility 2")
-# facility_2.print_history()
+# print(facility_2.get_history())
 
 # Display current state of model and export it to JSON file
 model_update = builder.get_model()
