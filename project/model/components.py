@@ -424,7 +424,7 @@ class History:
                     f"""Changed value: {command["changed_value"]}"""
                 )
                 # Source instance added when complete history is created
-                if len(command) > 8:
+                if command["source"] is not None:
                     return_str += (
                         f""", Source: {command["source"].get_name()}"""
                     )
@@ -469,6 +469,7 @@ class History:
             "changed_value": changed_value_type,
             "old_value": old_value,
             "new_value": new_value,
+            "source": None,
         }
         self._entry_no += 1
 
@@ -494,6 +495,25 @@ class History:
         }
 
         return history_at_time
+
+    def sort_history(self) -> "History":
+        """
+        Sorts History entries, primarily, chronologicaly by end_time and,
+        secundarily, alphabetically by source.
+
+        Returns:
+            History: Sorted History.
+        """
+        self._entries = dict(
+            sorted(
+                self.get_entries().items(),
+                key=lambda item: (
+                    datetime.strptime(item[1]["end_time"], "%Y:%m:%d.%H:%M"),
+                    type(item[1]["source"]).__name__,
+                ),
+            )
+        )
+        return self
 
 
 @dataclass
@@ -682,7 +702,7 @@ class Facility(HistoryObject):
                     complete_history._entries[entry_no] = value
                     entry_no += 1
 
-        return complete_history
+        return complete_history.sort_history()
 
 
 @dataclass
@@ -914,7 +934,7 @@ class Room(HistoryObject):
                         complete_history._entries[entry_no] = value
                         entry_no += 1
 
-        return complete_history
+        return complete_history.sort_history()
 
 
 @dataclass
@@ -1162,7 +1182,7 @@ class HoldingArea(HistoryObject):
                     complete_history._entries[entry_no]["source"] = container
                     entry_no += 1
 
-        return complete_history
+        return complete_history.sort_history()
 
 
 @dataclass
@@ -1708,7 +1728,20 @@ class Builder:
     """
     A class that creates instances of physical components and
     uses them to construct a model based on user input.
+
+    Attributes:
+        _initial_model (Dict[str, Dict]):
+            Initial model created by buid_model() function.
+        _current_model (Dict[str, Dict]):
+            Current model obtained with get_model() function.
+        _model_at_time (Dict[str, Dict]):
+            State of the model at a specific time recreated with
+            get_model_at_time() function.
     """
+
+    _initial_model: Dict[str, Dict] = field(default_factory=dict)
+    _current_model: Dict[str, Dict] = field(default_factory=dict)
+    _model_at_time: Dict[str, Dict] = field(default_factory=dict)
 
     def build_model(self, model: Dict[str, Dict]) -> None:
         """
@@ -1724,87 +1757,107 @@ class Builder:
                 through entries and exits.
         """
 
-        # Initialize facility with data from dictionary
-        #       Model MUST contain at least one facility.
-        if not model:
-            raise KeyError("Model must contain at least one facility.")
-
-        for _facility, facility_stats in model.items():
-            facilityInstance = Facility(
-                type=facility_stats["type"],
-                name=facility_stats["name"],
-                dimensions=Dimensions(
-                    facility_stats["dimensions"]["dx"],
-                    facility_stats["dimensions"]["dy"],
-                    facility_stats["dimensions"]["dx"],
-                ),
-                position=Position(
-                    facility_stats["position"]["x"],
-                    facility_stats["position"]["y"],
-                    facility_stats["position"]["z"],
-                ),
+        # Model MUST contain at least one facility.
+        if not model or len(model) < 2:
+            raise KeyError(
+                "Model must contain at least a time stamp and one facility."
             )
 
-            # Initialize room with data from dictionary
-            #       Facility MUST contain at least one room.
-            if not facility_stats["rooms"]:
-                raise KeyError("Facility must contain at least one room.")
+        for _facility, facility_stats in model.items():
+            # Synchronize global time with model's timestamp
+            if _facility == "time":
+                year = int(facility_stats["year"])
+                month = int(facility_stats["month"])
+                day = int(facility_stats["day"])
+                hour = int(facility_stats["hour"])
+                minute = int(facility_stats["minute"])
 
-            model_2: Dict[str, Dict] = facility_stats["rooms"]
-            for _room, room_stats in model_2.items():
-                roomInstance = Room(
-                    type=room_stats["type"],
-                    name=room_stats["name"],
+                time_dt = datetime(year, month, day, hour, minute)
+                MonitoringSystem.set_time(time_dt)
+
+            # Initialize facility with data from dictionary
+            else:
+                facilityInstance = Facility(
+                    type=facility_stats["type"],
+                    name=facility_stats["name"],
                     dimensions=Dimensions(
-                        room_stats["dimensions"]["dx"],
-                        room_stats["dimensions"]["dy"],
-                        room_stats["dimensions"]["dx"],
+                        facility_stats["dimensions"]["dx"],
+                        facility_stats["dimensions"]["dy"],
+                        facility_stats["dimensions"]["dx"],
                     ),
                     position=Position(
-                        room_stats["position"]["x"],
-                        room_stats["position"]["y"],
-                        room_stats["position"]["z"],
+                        facility_stats["position"]["x"],
+                        facility_stats["position"]["y"],
+                        facility_stats["position"]["z"],
                     ),
                 )
 
-                # Add room to facility
-                facilityInstance.add_room(roomInstance)
+                # Initialize room with data from dictionary
+                #       Facility MUST contain at least one room.
+                if not facility_stats["rooms"]:
+                    raise KeyError("Facility must contain at least one room.")
 
-                if len(room_stats) > 4:
-                    # Initialize holding area with data from dictionary
-                    #       Room MAY contain holding areas.
-                    model_3: Dict[str, Dict] = room_stats["holding_areas"]
-                    for _holding_area, holding_area_stats in model_3.items():
-                        holding_areaInstance = HoldingArea(
-                            name=holding_area_stats["name"],
-                            position=Position(
-                                holding_area_stats["position"]["x"],
-                                holding_area_stats["position"]["y"],
-                                holding_area_stats["position"]["z"],
-                            ),
-                        )
+                model_2: Dict[str, Dict] = facility_stats["rooms"]
+                for _room, room_stats in model_2.items():
+                    roomInstance = Room(
+                        type=room_stats["type"],
+                        name=room_stats["name"],
+                        dimensions=Dimensions(
+                            room_stats["dimensions"]["dx"],
+                            room_stats["dimensions"]["dy"],
+                            room_stats["dimensions"]["dx"],
+                        ),
+                        position=Position(
+                            room_stats["position"]["x"],
+                            room_stats["position"]["y"],
+                            room_stats["position"]["z"],
+                        ),
+                    )
 
-                        # Add holding area to room
-                        roomInstance.add_holding_area(holding_areaInstance)
+                    # Add room to facility
+                    facilityInstance.add_room(roomInstance)
 
-                        # Initialize container with data from dictionary
-                        #       Holding area MAY contain a container.
-                        if len(holding_area_stats) > 2:
-                            model_4: Dict = holding_area_stats["container"]
-                            containerInstance = Container(
-                                type=model_4["type"],
-                                name=model_4["name"],
-                                dimensions=Dimensions(
-                                    model_4["dimensions"]["dx"],
-                                    model_4["dimensions"]["dy"],
-                                    model_4["dimensions"]["dx"],
+                    if len(room_stats) > 4:
+                        # Initialize holding area with data from dictionary
+                        #       Room MAY contain holding areas.
+                        model_3: Dict[str, Dict] = room_stats["holding_areas"]
+                        for (
+                            _holding_area,
+                            holding_area_stats,
+                        ) in model_3.items():
+                            holding_areaInstance = HoldingArea(
+                                name=holding_area_stats["name"],
+                                position=Position(
+                                    holding_area_stats["position"]["x"],
+                                    holding_area_stats["position"]["y"],
+                                    holding_area_stats["position"]["z"],
                                 ),
                             )
 
-                            # Add container to holding area
-                            holding_areaInstance.add_container(
-                                containerInstance
-                            )
+                            # Add holding area to room
+                            roomInstance.add_holding_area(holding_areaInstance)
+
+                            # Initialize container with data from dictionary
+                            #       Holding area MAY contain a container.
+                            if len(holding_area_stats) > 2:
+                                model_4: Dict = holding_area_stats["container"]
+                                containerInstance = Container(
+                                    type=model_4["type"],
+                                    name=model_4["name"],
+                                    dimensions=Dimensions(
+                                        model_4["dimensions"]["dx"],
+                                        model_4["dimensions"]["dy"],
+                                        model_4["dimensions"]["dx"],
+                                    ),
+                                )
+
+                                # Add container to holding area
+                                holding_areaInstance.add_container(
+                                    containerInstance
+                                )
+
+        # Save model as initial model
+        self._initial_model = model
 
         if MonitoringSystem.get_verbosity() > 0:
             print("\nAll registered instances:")
@@ -1824,6 +1877,21 @@ class Builder:
                 through entries and exits.
         """
         model: Dict[str, Dict] = {}
+
+        # Get current time and write it into dictionary
+        current_time: str = MonitoringSystem.get_time()
+
+        date_part, time_part = current_time.split(".")
+        year, month, day = date_part.split(":")
+        hour, minute = time_part.split(":")
+
+        model["time"] = {
+            "year": year,
+            "month": month,
+            "day": day,
+            "hour": hour,
+            "minute": minute,
+        }
 
         # Get facilities from registry and write stats into dictionary
         faciliy_inventory: Dict[int, Facility] = (
@@ -1908,7 +1976,38 @@ class Builder:
                 j += 1
             j = 1
             i += 1
+
+        # Save model as current model
+        self._current_model = model
+
         return model
+
+    def get_model_at_time(self, time: str) -> Dict[str, Dict]:
+        """
+        Gets state of model at a specific time as
+        model dictionary and adjacency matrix by undoing
+        changes stored in Histories.
+
+        Args:
+            time (str): Time in the format YYYY:MM:DD.hh:mm.
+
+        Returns:
+            Dict[str, Dict]:
+                Dictionary containing names and structure of
+                facilities, rooms and holding areas.
+            :
+                Matrix specifying adjacency for rooms
+                through entries and exits.
+        """
+        if self._current_model is None:
+            self._current_model = self.get_model()
+
+        model: Dict[str, Dict] = {}
+
+        # tba
+
+        # Save model as model at time
+        self._model_at_time = model
 
     def load_dummy_model(self) -> Dict[str, Dict]:
         """
@@ -1918,6 +2017,13 @@ class Builder:
             Dict[str, Dict]: Dictionary with dummy model data.
         """
         dummy_model = {
+            "time": {
+                "year": "2024",
+                "month": "01",
+                "day": "01",
+                "hour": "00",
+                "minute": "00",
+            },
             "facility 1": {
                 "type": "Interim storage",
                 "name": "Facility 1",
