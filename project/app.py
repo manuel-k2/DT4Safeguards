@@ -1,4 +1,4 @@
-from model.components import MonitoringSystem, HoldingArea, Container
+from model.components import MonitoringSystem, Facility, HoldingArea, Container
 from model.components import Builder, Commander
 
 
@@ -10,7 +10,9 @@ builder.build_model(model)
 
 # Get container and holding area from registry
 container_1: Container = MonitoringSystem.get_instance(id=3)
-holding_area_origin: HoldingArea = container_1.get_location().get_holding_area()
+holding_area_origin: HoldingArea = (
+    container_1.get_location().get_holding_area()
+)
 holding_area_destination: HoldingArea = MonitoringSystem.get_instance(id=10)
 
 # Move container by sending Transport sepecifications to Commander
@@ -26,18 +28,29 @@ commander.issue_transport_command(
     target, origin, destination, start_time, end_time
 )
 
-# Print Holding area histories
-print("Current History - Holding area origin")
-print(holding_area_origin.get_history())
+# Print Holding area instance histories
+print("Current Instance History - Holding area origin")
+print(holding_area_origin.get_instance_history())
 
-print("Initial History - Holding area origin")
-print(holding_area_origin.get_history_at_time("2024:01:01.00:00"))
+print("Initial Instance History - Holding area origin")
+print(holding_area_origin.get_instance_history().at_time("2024:01:01.00:00"))
 
-print("Current History - Holding area destination")
-print(holding_area_destination.get_history())
+print("Current Instance History - Holding area destination")
+print(holding_area_destination.get_instance_history())
 
-print("Initial History - Holding area destination")
-print(holding_area_destination.get_history_at_time("2024:01:01.00:00"))
+print("Initial Instance History - Holding area destination")
+print(
+    holding_area_destination.get_instance_history().at_time("2024:01:01.00:00")
+)
+
+# Print facility complete histories
+facility_origin: Facility = origin.get_facility()
+print("Current Complete History - Facility origin")
+print(facility_origin.get_complete_history())
+
+facility_destination: Facility = destination.get_facility()
+print("Current Complete History - Facility destination")
+print(facility_destination.get_complete_history())
 
 # Display current state of model and export it to JSON file
 model_update = builder.get_model()

@@ -363,39 +363,28 @@ class HistoryObject(IDObject):
                 Instance of new value replacing old value.
                 (default is 'None')
         """
-        self.get_history().update_history(cmd, changed_value_type, old_value, new_value)
+        self.get_instance_history().update_history(
+            cmd, changed_value_type, old_value, new_value
+        )
 
-    def get_history(self) -> "History":
+    def get_instance_history(self) -> "History":
         """
-        Gets history instance of HistoryObject instance.
+        Gets History instance of HistoryObject instance.
 
         Returns:
             History: History instance of HistoryObject instance.
         """
         return self._history
 
-    def get_history_at_time(self, time: str) -> "History":
+    def get_complete_history(self) -> "History":
         """
-        Gets history instance of HistoryObject instance
-        at a specific time.
-
-        Args:
-            time (str): Time in the format YYYY:MM:DD.hh:mm.
+        Gets accumulated History instance of HistoryObject instance's History
+        and all therein contained HistoryObject instances' Histories.
 
         Returns:
-            History:
-                History instance of HistoryObject instance
-                at a specific time.
+            History: History instance.
         """
-        _history_at_time = History()
-        _history_at_time._entries = {
-            id: value
-            for id, value in self.get_history().get_entries().items()
-            if datetime.strptime(value["end_time"], "%Y:%m:%d.%H:%M")
-            < datetime.strptime(time, "%Y:%m:%d.%H:%M")
-        }
-
-        return _history_at_time
+        pass
 
 
 @dataclass
@@ -432,8 +421,14 @@ class History:
                     f"""Target: {command["target"].get_name()}, """
                     f"""Start: {command["start_time"]}, """
                     f"""End: {command["end_time"]}, """
-                    f"""Changed value: {command["changed_value"]}\n"""
+                    f"""Changed value: {command["changed_value"]}"""
                 )
+                # Source instance added when complete history is created
+                if len(command) > 8:
+                    return_str += (
+                        f""", Source: {command["source"].get_name()}"""
+                    )
+                return_str += ".\n"
             return return_str
 
     def get_entries(self) -> Dict[int, dict]:
@@ -451,7 +446,7 @@ class History:
         cmd: "Command",
         changed_value_type: str,
         old_value: object,
-        new_value: object
+        new_value: object,
     ) -> None:
         """
         Stores command specifications in a dictionary.
@@ -476,6 +471,29 @@ class History:
             "new_value": new_value,
         }
         self._entry_no += 1
+
+    def at_time(self, time: str) -> "History":
+        """
+        Gets history instance of HistoryObject instance
+        at a specific time.
+
+        Args:
+            time (str): Time in the format YYYY:MM:DD.hh:mm.
+
+        Returns:
+            History:
+                History instance of HistoryObject instance
+                at a specific time.
+        """
+        history_at_time = History()
+        history_at_time._entries = {
+            id: value
+            for id, value in self.get_entries().items()
+            if datetime.strptime(value["end_time"], "%Y:%m:%d.%H:%M")
+            < datetime.strptime(time, "%Y:%m:%d.%H:%M")
+        }
+
+        return history_at_time
 
 
 @dataclass
@@ -634,6 +652,37 @@ class Facility(HistoryObject):
                 for id, room in self._room_inventory.items():
                     print(f"ID: {id}, Type: Room, Name: {room.get_name()}")
         return copy(self._room_inventory)
+
+    def get_complete_history(self) -> "History":
+        """
+        Gets accumulated History instance of Facility instance History
+        and all therein contained HistoryObject instances' Histories.
+
+        Returns:
+            History: History instance.
+        """
+        complete_history = History()
+        entry_no: int = 1
+
+        # Get Facility's Instance History entries
+        for _no, value in self.get_instance_history().get_entries().items():
+            if value is not None:
+                complete_history._entries[entry_no] = value
+
+                # Add source information
+                complete_history._entries[entry_no]["source"] = self
+                entry_no += 1
+
+        # Get Rooms' Complete History entries
+        for _no, room in self.get_room_inventory().items():
+            for _no2, value in (
+                room.get_complete_history().get_entries().items()
+            ):
+                if value is not None:
+                    complete_history._entries[entry_no] = value
+                    entry_no += 1
+
+        return complete_history
 
 
 @dataclass
@@ -831,6 +880,41 @@ class Room(HistoryObject):
                         f"Name: {holding_area.get_name()}"
                     )
         return copy(self._holding_area_inventory)
+
+    def get_complete_history(self) -> "History":
+        """
+        Gets accumulated History instance of Room instance History
+        and all therein contained HistoryObject instances' Histories.
+
+        Returns:
+            History: History instance.
+        """
+        complete_history = History()
+        entry_no: int = 1
+
+        # Get Room's Instance History entries
+        for _no, value in self.get_instance_history().get_entries().items():
+            if value is not None:
+                complete_history._entries[entry_no] = value
+
+                # Add source information
+                complete_history._entries[entry_no]["source"] = self
+                entry_no += 1
+
+        # Get Holding area's Complete History entries
+        if self.get_holding_area_inventory() is not None:
+            for (
+                _no,
+                holding_area,
+            ) in self.get_holding_area_inventory().items():
+                for _no2, value in (
+                    holding_area.get_complete_history().get_entries().items()
+                ):
+                    if value is not None:
+                        complete_history._entries[entry_no] = value
+                        entry_no += 1
+
+        return complete_history
 
 
 @dataclass
@@ -1032,18 +1116,53 @@ class HoldingArea(HistoryObject):
                 cmd,
                 changed_value_type="container_inventory",
                 old_value=old_container_inventory,
-                new_value=new_container_inventory
+                new_value=new_container_inventory,
             )
             super()._activation(
-                cmd, 
+                cmd,
                 changed_value_type="occupation_status",
                 old_value=old_occupation_status,
-                new_value=new_occupation_status
+                new_value=new_occupation_status,
             )
             return
 
         # Update own history
         super()._activation(cmd)
+
+    def get_complete_history(self) -> "History":
+        """
+        Gets accumulated History instance of Holding area instance History
+        and possibly therein contained Container instance's History.
+
+        Returns:
+            History: History instance.
+        """
+        complete_history = History()
+        entry_no: int = 1
+
+        # Get Holding area's Instance History entries
+        for _no, value in self.get_instance_history().get_entries().items():
+            if value is not None:
+                complete_history._entries[entry_no] = value
+
+                # Add source information
+                complete_history._entries[entry_no]["source"] = self
+                entry_no += 1
+
+        # Get Container's Instance History entries
+        container = self.get_container()
+        if container is not None:
+            for _no, value in (
+                container.get_instance_history().get_entries().items()
+            ):
+                if value is not None:
+                    complete_history._entries[entry_no] = value
+
+                    # Add source information
+                    complete_history._entries[entry_no]["source"] = container
+                    entry_no += 1
+
+        return complete_history
 
 
 @dataclass
@@ -1178,7 +1297,7 @@ class Container(HistoryObject):
                 cmd,
                 changed_value_type="Location",
                 old_value=copy(origin),
-                new_value=copy(destination)
+                new_value=copy(destination),
             )
             return
 
