@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import ClassVar, Dict
+from typing import ClassVar, Dict, Optional
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 from copy import copy
@@ -133,7 +133,7 @@ class MonitoringSystem:
             raise InstanceNotFoundError()
 
         if cls.get_verbosity() > 0:
-            print(f"Retrieved instances: ")
+            print("Retrieved instances: ")
             for id, instance in instance_inventory.items():
                 print(f"ID: {id}, Type: {type(instance).__name__}")
 
@@ -338,15 +338,32 @@ class HistoryObject(IDObject):
             )
         self._activation(cmd)
 
-    def _activation(self, cmd: "Command") -> None:
+    def _activation(
+        self,
+        cmd: "Command",
+        changed_value_type: Optional[str] = None,
+        old_value: Optional[object] = None,
+        new_value: Optional[object] = None,
+    ) -> None:
         """
-        Registers a command passed to this instance and
-        activates certain functions based on the command type.
+        Registers a command passed to this instance.
+        Subclasses redefine method to activate certain functions
+        based on the command type. Subclass instances identify values
+        to be changed by command and transmit these to History instance.
 
         Args:
             cmd (Command): Instance of command to be processed.
+            changed_value_type (str, optional):
+                String describing the type of value changed by command.
+                (default is 'None')
+            old_value (object, optional):
+                Instance of old value to be changed by command.
+                (default is 'None')
+            new_value: (object, optional):
+                Instance of new value replacing old value.
+                (default is 'None')
         """
-        self._history.update_history(cmd)
+        self.get_history().update_history(cmd, changed_value_type, old_value, new_value)
 
     def get_history(self) -> "History":
         """
@@ -388,10 +405,12 @@ class History:
     an associated instance.
 
     Attributes:
+        _entry_no (int): Index for History entries
         _entries (Dict[int, dict]): Dictionary to store
             command specifications.
     """
 
+    _entry_no: int = 1
     _entries: Dict[int, dict] = field(default_factory=dict)
 
     def __repr__(self) -> str:
@@ -407,11 +426,13 @@ class History:
             return_str = ""
             for id, command in self._entries.items():
                 return_str += (
-                    f"""Command ID: {id}, """
+                    f"""Entry no. {id}:\n"""
+                    f"""Command ID: {command["cmd_id"]}, """
                     f"""Type: {command["cmd_type"]}, """
                     f"""Target: {command["target"].get_name()}, """
                     f"""Start: {command["start_time"]}, """
-                    f"""End: {command["end_time"]}.\n"""
+                    f"""End: {command["end_time"]}, """
+                    f"""Changed value: {command["changed_value"]}\n"""
                 )
             return return_str
 
@@ -425,19 +446,36 @@ class History:
         """
         return copy(self._entries)
 
-    def update_history(self, cmd: "Command") -> None:
+    def update_history(
+        self,
+        cmd: "Command",
+        changed_value_type: str,
+        old_value: object,
+        new_value: object
+    ) -> None:
         """
         Stores command specifications in a dictionary.
 
         Args:
             cmd (Command): Instance of command to be processed.
+            changed_value_type (str):
+                String describing the type of value changed by command.
+            old_value (object):
+                Instance of old value to be changed by command.
+            new_value: (object):
+                Instance of new value replacing old value.
         """
-        self._entries[cmd.get_id()] = {
+        self._entries[self._entry_no] = {
+            "cmd_id": cmd.get_id(),
             "cmd_type": cmd.get_type(),
             "target": cmd.get_target(),
             "start_time": cmd.get_start_time(),
             "end_time": cmd.get_end_time(),
+            "changed_value": changed_value_type,
+            "old_value": old_value,
+            "new_value": new_value,
         }
+        self._entry_no += 1
 
 
 @dataclass
@@ -975,12 +1013,34 @@ class HoldingArea(HistoryObject):
             cmd (Command): Instance of command to be processed.
         """
         if type(cmd) is TransportCmd:
-            # If holding area is at origin of transport
+            old_container_inventory = copy(self._container_inventory)
+            old_occupation_status = self.get_occupation_status()
+
+            # Remove container if holding area is at origin of transport
             if self is cmd.get_origin().get_holding_area():
                 self.remove_container()
-            # If holding area is at destination of transport
+
+            # Add container if holding area is at destination of transport
             if self is cmd.get_destination().get_holding_area():
                 self.add_container(cmd.get_target())
+
+            new_container_inventory = copy(self._container_inventory)
+            new_occupation_status = self.get_occupation_status()
+
+            # Update own history
+            super()._activation(
+                cmd,
+                changed_value_type="container_inventory",
+                old_value=old_container_inventory,
+                new_value=new_container_inventory
+            )
+            super()._activation(
+                cmd, 
+                changed_value_type="occupation_status",
+                old_value=old_occupation_status,
+                new_value=new_occupation_status
+            )
+            return
 
         # Update own history
         super()._activation(cmd)
@@ -1107,8 +1167,20 @@ class Container(HistoryObject):
             cmd (Command): Instance of command to be processed.
         """
         if type(cmd) is TransportCmd:
+            origin = cmd.get_origin()
+            destination = cmd.get_destination()
+
             # Update own location to destination
-            self.set_location(cmd.get_destination())
+            self.set_location(destination)
+
+            # Update own history
+            super()._activation(
+                cmd,
+                changed_value_type="Location",
+                old_value=copy(origin),
+                new_value=copy(destination)
+            )
+            return
 
         # Update own history
         super()._activation(cmd)
@@ -1126,32 +1198,31 @@ class Location:
         _holding_area (HoldingArea): Corresponding holding area instance.
     """
 
-    _facility: Facility
-    _room: Room
-    _holding_area: HoldingArea
+    _facility: Facility = None
+    _room: Room = None
+    _holding_area: HoldingArea = None
 
-    def __init__(self, *args):
+    def __init__(
+        self,
+        facility: Facility,
+        room: Optional[Room] = None,
+        holding_area: Optional[HoldingArea] = None,
+    ):
         """ "
         Initializes Location instance.
 
         Args:
             facility (Facility): Corresponding facility instance.
-            room (Room): Corresponding room instance (optional).
-            holding_area (HoldingArea):
-                Corresponding holding area instance (optional).
+            room (Room, optional):
+                Corresponding room instance (default is 'None').
+            holding_area (HoldingArea, optional):
+                Corresponding holding area instance (default is 'None').
         """
-        if len(args) > 0:
-            self.set_facility(args[0])
-        else:
-            self.set_facility(None)
-        if len(args) > 1:
-            self.set_room(args[1])
-        else:
-            self.set_room(None)
-        if len(args) > 2:
-            self.set_holding_area(args[2])
-        else:
-            self.set_holding_area(None)
+        self.set_facility(facility)
+        if room is not None:
+            self.set_room(room)
+        if holding_area is not None:
+            self.set_holding_area(holding_area)
 
     def __repr__(self) -> str:
         """
@@ -1501,23 +1572,15 @@ class Commander:
             )
 
             with self._authorize():
-                # Activate components at origin of transport
+                # Activate holding area at origin of transport
                 current_holding_area = target.get_location().get_holding_area()
                 current_holding_area.activation(cmd, self)
-                current_room = target.get_location().get_room()
-                current_room.activation(cmd, self)
-                current_facility = target.get_location().get_facility()
-                current_facility.activation(cmd, self)
 
-                # Activate components at destination of transport
-                destination_facility = destination.get_facility()
-                destination_facility.activation(cmd, self)
-                destination_room = destination.get_room()
-                destination_room.activation(cmd, self)
+                # Activate holding area at destination of transport
                 destination_holding_area = destination.get_holding_area()
                 destination_holding_area.activation(cmd, self)
 
-                # Activate target
+                # Activate target container
                 target.activation(cmd, self)
 
 

@@ -1,4 +1,4 @@
-from model.components import MonitoringSystem, Facility, HoldingArea, Container
+from model.components import MonitoringSystem, HoldingArea, Container
 from model.components import Builder, Commander
 
 
@@ -10,6 +10,7 @@ builder.build_model(model)
 
 # Get container and holding area from registry
 container_1: Container = MonitoringSystem.get_instance(id=3)
+holding_area_origin: HoldingArea = container_1.get_location().get_holding_area()
 holding_area_destination: HoldingArea = MonitoringSystem.get_instance(id=10)
 
 # Move container by sending Transport sepecifications to Commander
@@ -25,13 +26,18 @@ commander.issue_transport_command(
     target, origin, destination, start_time, end_time
 )
 
-# Print facility histories
-facility_1: Facility = MonitoringSystem.get_instance(id=0)
-print("Current History - Facility 1")
-print(facility_1.get_history())
+# Print Holding area histories
+print("Current History - Holding area origin")
+print(holding_area_origin.get_history())
 
-print("Initial History - Facility 1")
-print(facility_1.get_history_at_time("2024:01:01.00:00"))
+print("Initial History - Holding area origin")
+print(holding_area_origin.get_history_at_time("2024:01:01.00:00"))
+
+print("Current History - Holding area destination")
+print(holding_area_destination.get_history())
+
+print("Initial History - Holding area destination")
+print(holding_area_destination.get_history_at_time("2024:01:01.00:00"))
 
 # Display current state of model and export it to JSON file
 model_update = builder.get_model()
