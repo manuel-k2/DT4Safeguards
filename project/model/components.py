@@ -268,7 +268,10 @@ class MonitoringSystem:
                 facility.get_complete_history().get_entries().items()
             ):
                 if entry is not None:
-                    complete_history._entries[entry_no] = entry
+                    complete_history.set_entries(
+                        entry,
+                        entry_no,
+                    )
                     entry_no += 1
 
         return complete_history
@@ -314,7 +317,10 @@ class MonitoringSystem:
                     datetime.strptime(time, "%Y:%m:%d.%H:%M")
                     < datetime.strptime(entry["end_time"], "%Y:%m:%d.%H:%M")
                 ):
-                    ongoing_commands_at_time._entries[entry_no] = entry
+                    ongoing_commands_at_time.set_entries(
+                        entry,
+                        entry_no,
+                    )
                     entry_no += 1
 
         if ongoing_commands_at_time.get_entries() == {}:
@@ -491,11 +497,11 @@ class History:
         Returns:
             str: String representation of the History instance.
         """
-        if not self._entries:
+        if not self.get_entries():
             return "History is empty."
         else:
             return_str = ""
-            for id, command in self._entries.items():
+            for id, command in self.get_entries().items():
                 return_str += (
                     f"""Entry no. {id}:\n"""
                     f"""Command ID: {command["cmd_id"]}, """
@@ -513,6 +519,35 @@ class History:
                 return_str += ".\n"
             return return_str
 
+    def set_entries(self, value: object, *keys) -> None:
+        """
+        Sets entries of History instance's dictionary.
+
+        Args:
+            value (object):
+                Value to set at specified key path. If no keys provided
+                and value is a dictionary, entries will be replaced by value.
+            *keys (str):
+                Variable number of keys that specify path in nested dictionary
+                where value should be set.
+
+        """
+        # Repplace entries with values if no keys given
+        if not keys and isinstance(value, dict):
+            self._entries.clear()
+            self._entries.update(value)
+            return
+
+        # Loop over keys
+        current_level = self._entries
+        for key in keys[:-1]:
+            if key not in current_level:
+                current_level[key] = {}
+            current_level = current_level[key]
+
+        # Set the final value
+        current_level[keys[-1]] = value
+
     def get_entries(self) -> Dict[int, dict]:
         """
         Gets entries of History instance's dictionary.
@@ -522,6 +557,29 @@ class History:
 
         """
         return copy(self._entries)
+
+    def delete_entries(self, *keys) -> None:
+        """
+        Deletes a value in History instance's dictionary.
+
+        Args:
+            *keys (str):
+                Variable number of keys that specify path in nested dictionary
+                where key-value pair should be deleted.
+        """
+        if not keys:
+            warn("No keys as input. No changes made to History.")
+            return
+
+        # Loop over keys and check if they exist
+        current_level = self._entries
+        for key in keys[:-1]:
+            if key not in current_level:
+                raise KeyError(f"Key '{key}' not found.")
+            current_level = current_level[key]
+
+        # Delete the final key if it exists
+        del current_level[keys[-1]]
 
     def update_history(
         self,
@@ -542,7 +600,7 @@ class History:
             new_value: (object):
                 Instance of new value replacing old value.
         """
-        self._entries[self._entry_no] = {
+        cmd_dict = {
             "cmd_id": cmd.get_id(),
             "cmd_type": cmd.get_type(),
             "target": cmd.get_target(),
@@ -553,6 +611,7 @@ class History:
             "new_value": new_value,
             "source": None,
         }
+        self.set_entries(cmd_dict, self._entry_no)
         self._entry_no += 1
 
     def at_time(self, time: str) -> "History":
@@ -569,12 +628,13 @@ class History:
                 at a specific time.
         """
         history_at_time = History()
-        history_at_time._entries = {
+        at_time_dict = {
             id: entry
             for id, entry in self.get_entries().items()
             if datetime.strptime(entry["end_time"], "%Y:%m:%d.%H:%M")
             < datetime.strptime(time, "%Y:%m:%d.%H:%M")
         }
+        history_at_time.set_entries(at_time_dict)
 
         return history_at_time
 
@@ -586,7 +646,7 @@ class History:
         Returns:
             History: Sorted History.
         """
-        self._entries = dict(
+        sorted_dict = dict(
             sorted(
                 self.get_entries().items(),
                 key=lambda item: (
@@ -595,6 +655,7 @@ class History:
                 ),
             )
         )
+        self.set_entries(sorted_dict)
         return self
 
 
@@ -769,10 +830,13 @@ class Facility(HistoryObject):
         # Get Facility's Instance History entries
         for _no, entry in self.get_instance_history().get_entries().items():
             if entry is not None:
-                complete_history._entries[entry_no] = entry
+                complete_history.set_entries(
+                    entry,
+                    entry_no,
+                )
 
                 # Add source information
-                complete_history._entries[entry_no]["source"] = self
+                complete_history.set_entries(self, entry_no, "source")
                 entry_no += 1
 
         # Get Rooms' Complete History entries
@@ -781,7 +845,10 @@ class Facility(HistoryObject):
                 room.get_complete_history().get_entries().items()
             ):
                 if entry is not None:
-                    complete_history._entries[entry_no] = entry
+                    complete_history.set_entries(
+                        entry,
+                        entry_no,
+                    )
                     entry_no += 1
 
         return complete_history.sort_history()
@@ -997,10 +1064,13 @@ class Room(HistoryObject):
         # Get Room's Instance History entries
         for _no, entry in self.get_instance_history().get_entries().items():
             if entry is not None:
-                complete_history._entries[entry_no] = entry
+                complete_history.set_entries(
+                    entry,
+                    entry_no,
+                )
 
                 # Add source information
-                complete_history._entries[entry_no]["source"] = self
+                complete_history.set_entries(self, entry_no, "source")
                 entry_no += 1
 
         # Get Holding area's Complete History entries
@@ -1013,7 +1083,10 @@ class Room(HistoryObject):
                     holding_area.get_complete_history().get_entries().items()
                 ):
                     if entry is not None:
-                        complete_history._entries[entry_no] = entry
+                        complete_history.set_entries(
+                            entry,
+                            entry_no,
+                        )
                         entry_no += 1
 
         return complete_history.sort_history()
@@ -1245,10 +1318,13 @@ class HoldingArea(HistoryObject):
         # Get Holding area's Instance History entries
         for _no, entry in self.get_instance_history().get_entries().items():
             if entry is not None:
-                complete_history._entries[entry_no] = entry
+                complete_history.set_entries(
+                    entry,
+                    entry_no,
+                )
 
                 # Add source information
-                complete_history._entries[entry_no]["source"] = self
+                complete_history.set_entries(self, entry_no, "source")
                 entry_no += 1
 
         # Get Container's Instance History entries
@@ -1258,10 +1334,13 @@ class HoldingArea(HistoryObject):
                 container.get_instance_history().get_entries().items()
             ):
                 if entry is not None:
-                    complete_history._entries[entry_no] = entry
+                    complete_history.set_entries(
+                        entry,
+                        entry_no,
+                    )
 
                     # Add source information
-                    complete_history._entries[entry_no]["source"] = container
+                    complete_history.set_entries(container, entry_no, "source")
                     entry_no += 1
 
         return complete_history.sort_history()
@@ -2200,7 +2279,7 @@ class Builder:
                                                             "container"
                                                         ] = container_stats
                     # Remove processed history entries
-                    del complete_history._entries[no]
+                    complete_history.delete_entries(no)
 
                 # Identify History entries with start times before/ end times
                 # after target date (ongoing commands) and remove them
@@ -2211,7 +2290,7 @@ class Builder:
                     datetime.strptime(time, "%Y:%m:%d.%H:%M")
                     < datetime.strptime(entry["end_time"], "%Y:%m:%d.%H:%M")
                 ):
-                    del complete_history._entries[no]
+                    complete_history.delete_entries(no)
                     entry_no += 1
 
             # After removing all previously processed entries, the remainder

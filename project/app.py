@@ -76,6 +76,4 @@ print(MonitoringSystem.get_ongoing_commands_at_time(time))
 
 # Export state of model at specific time to a JSON file
 time2 = "2024:05:01.00:00"
-builder.export_model_state(
-    "../data/dummy_model_at_time_export.json", time2
-)
+builder.export_model_state("../data/dummy_model_at_time_export.json", time2)
