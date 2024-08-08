@@ -22,7 +22,7 @@
     "rooms": {
       "room 1": {
         "type": "Storage",
-        "name": "Room 1",
+        "name": "Room 1.1",
         "dimensions": {
           "dx": 1.0,
           "dy": 1.0,
@@ -35,7 +35,7 @@
         },
         "holding_areas": {
           "holding_area 1": {
-            "name": "HoldingArea 1",
+            "name": "HoldingArea 1.1.1",
             "position": {
               "x": 0.0,
               "y": 0.0,
@@ -52,7 +52,7 @@
             }
           },
           "holding_area 2": {
-            "name": "HoldingArea 2",
+            "name": "HoldingArea 1.1.2",
             "position": {
               "x": 0.0,
               "y": 0.0,
@@ -63,7 +63,7 @@
       },
       "room 2": {
         "type": "Storage",
-        "name": "Room 1",
+        "name": "Room 1.2",
         "dimensions": {
           "dx": 1.0,
           "dy": 1.0,
@@ -76,7 +76,7 @@
         },
         "holding_areas": {
           "holding_area 1": {
-            "name": "HoldingArea 1",
+            "name": "HoldingArea 1.2.1",
             "position": {
               "x": 0.0,
               "y": 0.0,
@@ -103,7 +103,7 @@
     "rooms": {
       "room 1": {
         "type": "Shaft",
-        "name": "Room 1",
+        "name": "Room 2.1",
         "dimensions": {
           "dx": 1.0,
           "dy": 1.0,
@@ -117,7 +117,7 @@
       },
       "room 2": {
         "type": "Drift",
-        "name": "Room 2",
+        "name": "Room 2.2",
         "dimensions": {
           "dx": 1.0,
           "dy": 1.0,
@@ -130,7 +130,7 @@
         },
         "holding_areas": {
           "holding_area 1": {
-            "name": "HoldingArea 1",
+            "name": "HoldingArea 2.2.1",
             "position": {
               "x": 0.0,
               "y": 0.0,

@@ -40,15 +40,6 @@
                             "x": 0.0,
                             "y": 0.0,
                             "z": 0.0
-                        },
-                        "container": {
-                            "type": "Castor",
-                            "name": "Container 1",
-                            "dimensions": {
-                                "dx": 1.0,
-                                "dy": 1.0,
-                                "dz": 1.0
-                            }
                         }
                     },
                     "holding_area 2": {
@@ -135,6 +126,15 @@
                             "x": 0.0,
                             "y": 0.0,
                             "z": 0.0
+                        },
+                        "container": {
+                            "type": "Castor",
+                            "name": "Container 1",
+                            "dimensions": {
+                                "dx": 1.0,
+                                "dy": 1.0,
+                                "dz": 1.0
+                            }
                         }
                     }
                 }

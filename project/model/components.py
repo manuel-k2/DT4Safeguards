@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from typing import ClassVar, Dict, Optional
+from abc import abstractmethod
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 from copy import copy
-
+from warnings import warn
 import json
 
 from model.units import Dimensions, Position
@@ -203,13 +204,15 @@ class MonitoringSystem:
 
         # Check if start time is before current global time
         if start_dt < current_dt:
+            warn("Start time is before current global time.", stacklevel=2)
+
             duration_before_current_time = int(
                 (current_dt - start_dt).total_seconds() / 60
             )  # Duration in minutes
 
             if cls.get_verbosity() > 0:
                 print(
-                    f"""Warning: Start time is {duration_before_current_time}
+                    f"""Start time is {duration_before_current_time}
                     min before current global time."""
                 )
 
@@ -244,6 +247,84 @@ class MonitoringSystem:
         """
         cls._global_time += timedelta(minutes=amount)
 
+    @classmethod
+    def get_complete_history(cls) -> "History":
+        """
+        Gets complete History of MonitoringSystem class and
+        all HistoryObject instances in its regirstry.
+
+        Returns:
+            History: History instance of MonitoringSystem.
+        """
+        # Get facilities from registry and get their complete histories
+        faciliy_inventory: Dict[int, Facility] = cls.get_instance_by_type(
+            Facility
+        )
+        complete_history = History()
+        entry_no: int = 1
+
+        for _id, facility in faciliy_inventory.items():
+            for _no, entry in (
+                facility.get_complete_history().get_entries().items()
+            ):
+                if entry is not None:
+                    complete_history._entries[entry_no] = entry
+                    entry_no += 1
+
+        return complete_history
+
+    @classmethod
+    def get_ongoing_commands_at_time(cls, time: str) -> "History":
+        """
+        Creates a History instance with ongoing commands at a
+        specific time
+
+        Args:
+            time (str): Time in the format YYYY:MM:DD.hh:mm.
+
+        Returns:
+            History: History instance with ongoing commands.
+        """
+        # Get complete history of MonitoringSystem class
+        complete_history = cls.get_complete_history()
+
+        # Create History for ongoing commands
+        ongoing_commands_at_time = History()
+
+        # Interrupt process if complete history is empty
+        if complete_history.get_entries() == {}:
+            warn(
+                """History of all instances in model is empty.
+                Empty History instance returned.""",
+                stacklevel=2,
+            )
+            return complete_history
+
+        else:
+            complete_history = complete_history.sort_history()
+
+            entry_no: int = 1
+            for _no, entry in complete_history.get_entries().items():
+                # Identify History entries with start times before and
+                # end times after target time
+                if (
+                    datetime.strptime(entry["start_time"], "%Y:%m:%d.%H:%M")
+                    < datetime.strptime(time, "%Y:%m:%d.%H:%M")
+                ) and (
+                    datetime.strptime(time, "%Y:%m:%d.%H:%M")
+                    < datetime.strptime(entry["end_time"], "%Y:%m:%d.%H:%M")
+                ):
+                    ongoing_commands_at_time._entries[entry_no] = entry
+                    entry_no += 1
+
+        if ongoing_commands_at_time.get_entries() == {}:
+            warn(
+                """No ongoing commands at specified times.
+                Empty History instance returned.""",
+                stacklevel=2,
+            )
+        return ongoing_commands_at_time
+
 
 @dataclass
 class IDObject:
@@ -258,10 +339,8 @@ class IDObject:
         _verbosity (int): Class-level verbosity setting.
     """
 
-    _id: int = field(init=False)  # ID of IDObject instance
-    _init_time: str = field(
-        init=False
-    )  # Initialization time of IDObject instance
+    _id: int = field(init=False)
+    _init_time: str = field(init=False)
     _verbosity: ClassVar[int] = 1  # 0: Silent, 1: Verbose
 
     @classmethod
@@ -338,6 +417,7 @@ class HistoryObject(IDObject):
             )
         self._activation(cmd)
 
+    # @abstractmethod
     def _activation(
         self,
         cmd: "Command",
@@ -376,10 +456,12 @@ class HistoryObject(IDObject):
         """
         return self._history
 
+    @abstractmethod
     def get_complete_history(self) -> "History":
         """
         Gets accumulated History instance of HistoryObject instance's History
         and all therein contained HistoryObject instances' Histories.
+        Has to be overwritten in subclass definitions.
 
         Returns:
             History: History instance.
@@ -433,7 +515,7 @@ class History:
 
     def get_entries(self) -> Dict[int, dict]:
         """
-        Get entries of History instance's dictionary.
+        Gets entries of History instance's dictionary.
 
         Returns:
             Dict[int, dict]: Dictionary with command specifications.
@@ -488,9 +570,9 @@ class History:
         """
         history_at_time = History()
         history_at_time._entries = {
-            id: value
-            for id, value in self.get_entries().items()
-            if datetime.strptime(value["end_time"], "%Y:%m:%d.%H:%M")
+            id: entry
+            for id, entry in self.get_entries().items()
+            if datetime.strptime(entry["end_time"], "%Y:%m:%d.%H:%M")
             < datetime.strptime(time, "%Y:%m:%d.%H:%M")
         }
 
@@ -685,9 +767,9 @@ class Facility(HistoryObject):
         entry_no: int = 1
 
         # Get Facility's Instance History entries
-        for _no, value in self.get_instance_history().get_entries().items():
-            if value is not None:
-                complete_history._entries[entry_no] = value
+        for _no, entry in self.get_instance_history().get_entries().items():
+            if entry is not None:
+                complete_history._entries[entry_no] = entry
 
                 # Add source information
                 complete_history._entries[entry_no]["source"] = self
@@ -695,11 +777,11 @@ class Facility(HistoryObject):
 
         # Get Rooms' Complete History entries
         for _no, room in self.get_room_inventory().items():
-            for _no2, value in (
+            for _no2, entry in (
                 room.get_complete_history().get_entries().items()
             ):
-                if value is not None:
-                    complete_history._entries[entry_no] = value
+                if entry is not None:
+                    complete_history._entries[entry_no] = entry
                     entry_no += 1
 
         return complete_history.sort_history()
@@ -913,9 +995,9 @@ class Room(HistoryObject):
         entry_no: int = 1
 
         # Get Room's Instance History entries
-        for _no, value in self.get_instance_history().get_entries().items():
-            if value is not None:
-                complete_history._entries[entry_no] = value
+        for _no, entry in self.get_instance_history().get_entries().items():
+            if entry is not None:
+                complete_history._entries[entry_no] = entry
 
                 # Add source information
                 complete_history._entries[entry_no]["source"] = self
@@ -927,11 +1009,11 @@ class Room(HistoryObject):
                 _no,
                 holding_area,
             ) in self.get_holding_area_inventory().items():
-                for _no2, value in (
+                for _no2, entry in (
                     holding_area.get_complete_history().get_entries().items()
                 ):
-                    if value is not None:
-                        complete_history._entries[entry_no] = value
+                    if entry is not None:
+                        complete_history._entries[entry_no] = entry
                         entry_no += 1
 
         return complete_history.sort_history()
@@ -1161,9 +1243,9 @@ class HoldingArea(HistoryObject):
         entry_no: int = 1
 
         # Get Holding area's Instance History entries
-        for _no, value in self.get_instance_history().get_entries().items():
-            if value is not None:
-                complete_history._entries[entry_no] = value
+        for _no, entry in self.get_instance_history().get_entries().items():
+            if entry is not None:
+                complete_history._entries[entry_no] = entry
 
                 # Add source information
                 complete_history._entries[entry_no]["source"] = self
@@ -1172,11 +1254,11 @@ class HoldingArea(HistoryObject):
         # Get Container's Instance History entries
         container = self.get_container()
         if container is not None:
-            for _no, value in (
+            for _no, entry in (
                 container.get_instance_history().get_entries().items()
             ):
-                if value is not None:
-                    complete_history._entries[entry_no] = value
+                if entry is not None:
+                    complete_history._entries[entry_no] = entry
 
                     # Add source information
                     complete_history._entries[entry_no]["source"] = container
@@ -1646,14 +1728,19 @@ class TransportCmd(Command):
 class Commander:
     """
     A class that creates commands based on user input.
+
+    Attributes:
+        _authorized_commander (Commander):
+            Commander instance that is authorized to activate
+            other instances.
     """
 
-    _authorized_commander = None
+    _authorized_commander: "Commander" = None
 
     @contextmanager
     def _authorize(self):
         """
-        Authorizes Commander instance ro activate other instances.
+        Authorizes Commander instance to activate other instances.
         """
         old_commander = Commander._authorized_commander
         Commander._authorized_commander = self
@@ -1726,24 +1813,11 @@ class Commander:
 @dataclass
 class Builder:
     """
-    A class that creates instances of physical components and
-    uses them to construct a model based on user input.
-
-    Attributes:
-        _initial_model (Dict[str, Dict]):
-            Initial model created by buid_model() function.
-        _current_model (Dict[str, Dict]):
-            Current model obtained with get_model() function.
-        _model_at_time (Dict[str, Dict]):
-            State of the model at a specific time recreated with
-            get_model_at_time() function.
+    A class that constructs models and exports model data based on
+    user input.
     """
 
-    _initial_model: Dict[str, Dict] = field(default_factory=dict)
-    _current_model: Dict[str, Dict] = field(default_factory=dict)
-    _model_at_time: Dict[str, Dict] = field(default_factory=dict)
-
-    def build_model(self, model: Dict[str, Dict]) -> None:
+    def _build_model(self, model: Dict[str, Dict]) -> None:
         """
         Builds a model on a dictionary-based
         input and an adjacency matrix.
@@ -1856,16 +1930,13 @@ class Builder:
                                     containerInstance
                                 )
 
-        # Save model as initial model
-        self._initial_model = model
-
         if MonitoringSystem.get_verbosity() > 0:
             print("\nAll registered instances:")
             MonitoringSystem.display_registry()
 
-    def get_model(self) -> Dict[str, Dict]:
+    def _get_current_model_state(self) -> Dict[str, Dict]:
         """
-        Gets current state of model as
+        Gets display of current state of model as
         model dictionary and adjacency matrix.
 
         Returns:
@@ -1977,16 +2048,14 @@ class Builder:
             j = 1
             i += 1
 
-        # Save model as current model
-        self._current_model = model
-
         return model
 
-    def get_model_at_time(self, time: str) -> Dict[str, Dict]:
+    def _get_model_state_at_time(self, time: str) -> Dict[str, Dict]:
         """
-        Gets state of model at a specific time as
-        model dictionary and adjacency matrix by undoing
-        changes stored in Histories.
+        Gets state of model at a specific time as dictionary and
+        adjacency matrix. Model state is recreated by undoing
+        changes stored in the complete History instance of the
+        MonitoringSystem class.
 
         Args:
             time (str): Time in the format YYYY:MM:DD.hh:mm.
@@ -1999,30 +2068,175 @@ class Builder:
                 Matrix specifying adjacency for rooms
                 through entries and exits.
         """
-        if self._current_model is None:
-            self._current_model = self.get_model()
+        model: Dict[str, Dict] = self._get_current_model_state()
 
-        model: Dict[str, Dict] = {}
+        # Get complete history of MonitoringSystem class
+        complete_history = MonitoringSystem.get_complete_history()
 
-        # tba
+        # Interrupt process if complete history is empty
+        if complete_history.get_entries == {}:
+            warn(
+                """History of all instances in model is empty.
+                Model of current state returned.""",
+                stacklevel=2,
+            )
+            return model
 
-        # Save model as model at time
-        self._model_at_time = model
+        else:
+            complete_history = complete_history.sort_history()
 
-    def load_dummy_model(self) -> Dict[str, Dict]:
+            entry_no: int = 1
+            for no, entry in complete_history.get_entries().items():
+                # Identify History entries with start times after target date
+                if datetime.strptime(
+                    time, "%Y:%m:%d.%H:%M"
+                ) < datetime.strptime(entry["start_time"], "%Y:%m:%d.%H:%M"):
+                    changed_value_type: str = entry["changed_value"]
+                    source_type: type = type(entry["source"])
+
+                    # Undo changes done by commands based on source type.
+                    if source_type is Container:
+                        # Undo changes to container based on changed value type
+                        if changed_value_type == "Location":
+                            target: Container = entry["target"]
+                            container_stats: dict = {
+                                "type": target.get_type(),
+                                "name": target.get_name(),
+                                "dimensions": {
+                                    "dx": target.get_dimensions().get_x(),
+                                    "dy": target.get_dimensions().get_y(),
+                                    "dz": target.get_dimensions().get_z(),
+                                },
+                            }
+
+                            old_value: Location = entry["old_value"]
+                            new_value: Location = entry["new_value"]
+
+                            current_facility_name = (
+                                new_value.get_facility().get_name()
+                            )
+                            current_room_name = new_value.get_room().get_name()
+                            current_h_a_name = (
+                                new_value.get_holding_area().get_name()
+                            )
+
+                            previous_facility_name = (
+                                old_value.get_facility().get_name()
+                            )
+                            previous_room_name = (
+                                old_value.get_room().get_name()
+                            )
+                            previous_h_a_name = (
+                                old_value.get_holding_area().get_name()
+                            )
+
+                            for _facility, facility_stats in model.items():
+                                if _facility != "time":
+                                    # Identify current location
+                                    if (
+                                        facility_stats["name"]
+                                        == current_facility_name
+                                    ):
+                                        room_dict: Dict = facility_stats[
+                                            "rooms"
+                                        ]
+
+                                        for (
+                                            _rooms,
+                                            room_stats,
+                                        ) in room_dict.items():
+                                            if (
+                                                room_stats["name"]
+                                                == current_room_name
+                                            ):
+                                                h_a_dict: Dict = room_stats[
+                                                    "holding_areas"
+                                                ]
+
+                                                for (
+                                                    _h_a,
+                                                    h_a_stats,
+                                                ) in h_a_dict.items():
+                                                    if (
+                                                        h_a_stats["name"]
+                                                        == current_h_a_name
+                                                    ):
+                                                        # Remove container
+                                                        del h_a_stats[
+                                                            "container"
+                                                        ]
+
+                                    # Identify previous location
+                                    if (
+                                        facility_stats["name"]
+                                        == previous_facility_name
+                                    ):
+                                        room_dict: Dict = facility_stats[
+                                            "rooms"
+                                        ]
+
+                                        for (
+                                            _rooms,
+                                            room_stats,
+                                        ) in room_dict.items():
+                                            if (
+                                                room_stats["name"]
+                                                == previous_room_name
+                                            ):
+                                                h_a_dict: Dict = room_stats[
+                                                    "holding_areas"
+                                                ]
+
+                                                for (
+                                                    _h_a,
+                                                    h_a_stats,
+                                                ) in h_a_dict.items():
+                                                    if (
+                                                        h_a_stats["name"]
+                                                        == previous_h_a_name
+                                                    ):
+                                                        # Add container
+                                                        h_a_stats[
+                                                            "container"
+                                                        ] = container_stats
+                    # Remove processed history entries
+                    del complete_history._entries[no]
+
+                # Identify History entries with start times before/ end times
+                # after target date (ongoing commands) and remove them
+                if (
+                    datetime.strptime(entry["start_time"], "%Y:%m:%d.%H:%M")
+                    < datetime.strptime(time, "%Y:%m:%d.%H:%M")
+                ) and (
+                    datetime.strptime(time, "%Y:%m:%d.%H:%M")
+                    < datetime.strptime(entry["end_time"], "%Y:%m:%d.%H:%M")
+                ):
+                    del complete_history._entries[no]
+                    entry_no += 1
+
+            # After removing all previously processed entries, the remainder
+            # should beequivalent to the complete history at target time
+            assert (
+                complete_history.get_entries()
+                == MonitoringSystem.get_complete_history()
+                .at_time(time)
+                .get_entries()
+            )
+
+            return model
+
+    def load_dummy_model(self) -> None:
         """
-        Creates a dictionary with dummy model data.
-
-        Returns:
-            Dict[str, Dict]: Dictionary with dummy model data.
+        Creates a dictionary with dummy model data and
+        builds the model.
         """
         dummy_model = {
             "time": {
                 "year": "2024",
-                "month": "01",
-                "day": "01",
-                "hour": "00",
-                "minute": "00",
+                "month": "08",
+                "day": "06",
+                "hour": "14",
+                "minute": "19",
             },
             "facility 1": {
                 "type": "Interim storage",
@@ -2032,12 +2246,12 @@ class Builder:
                 "rooms": {
                     "room 1": {
                         "type": "Storage",
-                        "name": "Room 1",
+                        "name": "Room 1.1",
                         "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
                         "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                         "holding_areas": {
                             "holding_area 1": {
-                                "name": "HoldingArea 1",
+                                "name": "HoldingArea 1.1.1",
                                 "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                                 "container": {
                                     "type": "Castor",
@@ -2050,19 +2264,19 @@ class Builder:
                                 },
                             },
                             "holding_area 2": {
-                                "name": "HoldingArea 2",
+                                "name": "HoldingArea 1.1.2",
                                 "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                             },
                         },
                     },
                     "room 2": {
                         "type": "Storage",
-                        "name": "Room 1",
+                        "name": "Room 1.2",
                         "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
                         "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                         "holding_areas": {
                             "holding_area 1": {
-                                "name": "HoldingArea 1",
+                                "name": "HoldingArea 1.2.1",
                                 "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                             }
                         },
@@ -2077,18 +2291,18 @@ class Builder:
                 "rooms": {
                     "room 1": {
                         "type": "Shaft",
-                        "name": "Room 1",
+                        "name": "Room 2.1",
                         "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
                         "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                     },
                     "room 2": {
                         "type": "Drift",
-                        "name": "Room 2",
+                        "name": "Room 2.2",
                         "dimensions": {"dx": 1.0, "dy": 1.0, "dz": 1.0},
                         "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                         "holding_areas": {
                             "holding_area 1": {
-                                "name": "HoldingArea 1",
+                                "name": "HoldingArea 2.2.1",
                                 "position": {"x": 0.0, "y": 0.0, "z": 0.0},
                             }
                         },
@@ -2097,9 +2311,9 @@ class Builder:
             },
         }
 
-        return dummy_model
+        self._build_model(dummy_model)
 
-    def load_model_from_file(self, file_path: str) -> Dict[str, Dict]:
+    def load_model_from_file(self, file_path: str) -> None:
         """
         Creates a model based on a file in JSON format.
         See data/dummy_model.json for syntax.
@@ -2107,14 +2321,12 @@ class Builder:
         Args:
             file_path (str):
                 Relative or absolute path to json file with model data.
-
-        Returns:
-            Dict[str, Dict]: Dictionary with model data.
         """
         try:
             with open(file_path) as file:
-                data = json.load(file)
-            return data
+                model = json.load(file)
+            self._build_model(model)
+            return None
         except FileNotFoundError:
             if MonitoringSystem.get_verbosity() > 0:
                 print(f"Error: The file '{file_path}' was not found.")
@@ -2124,18 +2336,23 @@ class Builder:
                 print(f"Error: The file '{file_path}' is not a valid JSON.")
             return None
 
-    def export_model_to_file(
-        self, model: Dict[str, Dict], file_path: str
-    ) -> None:
+    def export_model_state(self, file_path: str, time: str = "") -> None:
         """
-        Creates a JSON file with model information.
+        Creates a JSON file with information on state of the model.
+        If time argument is added, model state at this specific time
+        is exported.
 
         Args:
-            model (Dict[str, Dict]):
-                Dictionary that is to be exported to JSON file.
             file_path (str):
                 Relative or absolute path to json file with model data.
+            time (str, optional):
+                Time in the format YYYY:MM:DD.hh:mm. default is ''
         """
+        if time == "":
+            model: Dict[str, Dict] = self._get_current_model_state()
+        else:
+            model: Dict[str, Dict] = self._get_model_state_at_time(time)
+
         try:
             with open(file_path, "w") as file:
                 json.dump(model, file, indent=4)
@@ -2147,15 +2364,6 @@ class Builder:
                     f"""An error occurred while
                     saving the model to {file_path}: {e}"""
                 )
-
-    def create_model_manually(self) -> Dict[str, Dict]:
-        """
-        Creates a model manually based on user prompts.
-
-        Returns:
-            Dict[str, Dict]: Dictionary with model data.
-        """
-        pass
 
     def load_dummy_adjacency_matrix(self):
         """
